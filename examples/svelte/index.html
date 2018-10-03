@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Welcome to Svelte</title>
+
+    <script src="../../packages/survey-svelte/survey.svelte.js"></script>
+</head>
+
+<body>
+    <div id="surveyElement"></div>
+    <script>
+        window.survey = new Survey.Model({
+            target: document.querySelector("#surveyElement")
+        })
+    </script>
+</body>
+
+</html>

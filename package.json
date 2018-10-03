@@ -24,7 +24,8 @@
     "watch_react_dev": "webpack --env.buildType dev --env.platform react --watch",
     "watch_angular_dev": "webpack --env.buildType dev --env.platform angular --watch",
     "watch_jquery_dev": "webpack --env.buildType dev --env.platform jquery --watch",
-    "watch_vue_dev": "webpack --env.buildType dev --env.platform vue --watch"
+    "watch_vue_dev": "webpack --env.buildType dev --env.platform vue --watch",
+    "watch_svelte_dev": "webpack --env.buildType dev --env.platform svelte --watch"
   },
   "version": "1.0.47",
   "name": "surveyjs",
@@ -69,6 +70,8 @@
     "standard-version": "4.0.0",
     "style-loader": "0.13.1",
     "surveyjs-doc-generator": "git+https://github.com/surveyjs/surveyjs-doc-generator.git",
+    "svelte": "^2.13.5",
+    "svelte-loader": "^2.11.0",
     "testcafe": "0.15.0",
     "testcafe-browser-provider-saucelabs": "1.1.0",
     "ts-loader": "^5.2.1",
