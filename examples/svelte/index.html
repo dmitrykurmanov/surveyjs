@@ -10,8 +10,39 @@
 <body>
     <div id="surveyElement"></div>
     <script>
+        var json = {
+            questions: [
+                {
+                    type: "radiogroup",
+                    name: "car",
+                    title: "What car are you driving?",
+                    isRequired: true,
+                    colCount: 4,
+                    choices: [
+                        "None",
+                        "Ford",
+                        "Vauxhall",
+                        "Volkswagen",
+                        "Nissan",
+                        "Audi",
+                        "Mercedes-Benz",
+                        "BMW",
+                        "Peugeot",
+                        "Toyota",
+                        "Citroen"
+                    ]
+                }
+            ]
+        };
+
+        m = new Survey.ModelCore(json); // TODO remove
+        console.log(m.getAllQuestions().length); // TODO remove
+
         window.survey = new Survey.Model({
-            target: document.querySelector("#surveyElement")
+            target: document.querySelector("#surveyElement"),
+            data: {
+                json: json
+            }
         })
     </script>
 </body>

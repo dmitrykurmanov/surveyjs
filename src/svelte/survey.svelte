@@ -1,11 +1,25 @@
-<h1>{msg}</h1>
+<div class={msg}>
+	{model.getAllQuestions().length}
+</div>
 
 <script>
+	import { SurveyModel } from "../survey";
+	import { surveyCss } from "../defaultCss/cssstandard";
+
 	export default {
 	  data() {
 	    return {
-	      msg: "Hello Svelte"
+	      json: null
 	    };
+	  },
+	  computed: {
+	    model: ({ json }) => {
+	      debugger;
+	      var sm = SurveyModel;
+	      const model = new SurveyModel(json);
+	      console.log(model.getAllQuestions().length);
+	      return model;
+	    }
 	  }
 	};
 </script>
