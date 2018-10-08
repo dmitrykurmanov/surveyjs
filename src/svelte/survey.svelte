@@ -1,5 +1,16 @@
 <div class={css.root}>
-	{model.getAllQuestions().length}
+	<div class="sv_custom_header"></div>
+	<div class="sv_container">
+
+		{#if hasTitle}
+		<div class={css.header}>
+			<h3>
+				<!-- <survey-string :locString="survey.locTitle" /> -->
+			</h3>
+		</div>
+		{/if}
+
+	</div>
 </div>
 
 <script>
@@ -18,6 +29,9 @@
 	    model: ({ json }) => {
 	      const model = new SurveyModel(json);
 	      return model;
+	    },
+	    hasTitle: ({ model }) => {
+	      return !!model.title && model.showTitle;
 	    }
 	  }
 	};

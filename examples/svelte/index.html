@@ -2,15 +2,17 @@
 <html lang="en">
 
 <head>
-    <title>Welcome to Svelte</title>
+	<title>Welcome to Svelte</title>
 
-    <script src="../../packages/survey-svelte/survey.svelte.js"></script>
+	<script src="../../packages/survey-svelte/survey.svelte.js">
+	</script>
 </head>
 
 <body>
-    <div id="surveyElement"></div>
-    <script>
-        var json = {
+	<div id="surveyElement"></div>
+	<script>
+		var json = {
+            title: "Hey",
             questions: [
                 {
                     type: "radiogroup",
@@ -41,7 +43,7 @@
                 json: json
             }
         })
-    </script>
+	</script>
 </body>
 
 </html>
