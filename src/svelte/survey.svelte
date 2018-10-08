@@ -1,23 +1,22 @@
-<div class={msg}>
+<div class={css.root}>
 	{model.getAllQuestions().length}
 </div>
 
 <script>
 	import { SurveyModel } from "../survey";
 	import { surveyCss } from "../defaultCss/cssstandard";
+	import { QuestionRadiogroupModel } from "../question_radiogroup";
 
 	export default {
 	  data() {
 	    return {
-	      json: null
+	      json: null,
+	      css: surveyCss.getCss()
 	    };
 	  },
 	  computed: {
 	    model: ({ json }) => {
-	      debugger;
-	      var sm = SurveyModel;
 	      const model = new SurveyModel(json);
-	      console.log(model.getAllQuestions().length);
 	      return model;
 	    }
 	  }
