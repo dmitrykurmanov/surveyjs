@@ -5,7 +5,7 @@
 		{#if hasTitle}
 		<div class={css.header}>
 			<h3>
-				<!-- <survey-string :locString="survey.locTitle" /> -->
+				<SurveyString locString={model.locTitle}/>
 			</h3>
 		</div>
 		{/if}
@@ -17,6 +17,7 @@
 	import { SurveyModel } from "../survey";
 	import { surveyCss } from "../defaultCss/cssstandard";
 	import { QuestionRadiogroupModel } from "../question_radiogroup";
+	import SurveyString from "./string.svelte";
 
 	export default {
 	  data() {
@@ -24,6 +25,9 @@
 	      json: null,
 	      css: surveyCss.getCss()
 	    };
+	  },
+	  components: {
+	    SurveyString
 	  },
 	  computed: {
 	    model: ({ json }) => {
