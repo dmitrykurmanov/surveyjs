@@ -8,7 +8,26 @@
 				<SurveyString locString={model.locTitle}/>
 			</h3>
 		</div>
+		{/if} {#if hasCompletedPage}
+		<div>
+			<div class={getCompletedPageClasses()}>
+				{@html model.processedCompletedHtml}
+			</div>
+			{#if model.completedState != ''}
+			<div class={css.saveData.root}>
+				<div class={getCompletedStateClasses()}>
+					<span>{model.completedStateText}</span>
+					{#if model.completedState == 'error'}
+					<input type="button" value={model.getLocString( 'saveAgainButton')} on:click="doTrySaveAgain()" class={css.saveData.saveAgainButton}
+					/> {/if}
+
+				</div>
+			</div>
+			{/if}
+
+		</div>
 		{/if}
+
 
 	</div>
 </div>
@@ -36,6 +55,20 @@
 	    },
 	    hasTitle: ({ model }) => {
 	      return !!model.title && model.showTitle;
+	    },
+	    hasCompletedPage: ({ model }) => {
+	      return model.showCompletedPage && model.state === "completed";
+	    },
+	    getCompletedPageClasses: ({ css }) => {
+	      return css.body + " " + css.completedPage;
+	    },
+	    getCompletedStateClasses: ({ css, model }) => {
+	      return css.saveData[model.completedState];
+	    }
+	  },
+	  methods: {
+	    doTrySaveAgain() {
+	      this.get().model.doComplete();
 	    }
 	  }
 	};

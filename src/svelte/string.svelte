@@ -1,7 +1,7 @@
 <span style="position: static;">
 	{#if locString.hasHtml}
 	<span style="position: static;">
-		sss {@html locString.renderedHtml}
+		{@html locString.renderedHtml}
 	</span>
 	{:else} {locString.renderedHtml} {/if}
 </span>
