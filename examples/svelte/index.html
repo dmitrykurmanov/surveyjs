@@ -5,7 +5,8 @@
 	<title>Welcome to Svelte</title>
 
 	<script src="../../packages/survey-svelte/survey.svelte.js">
-	</script>
+
+</script>
 </head>
 
 <body>
@@ -37,10 +38,12 @@
             ]
         };
 
-        window.survey = new Survey.Model({
+        window.survey = new Survey.Model(json);
+
+        window.survey = new Survey.Survey({
             target: document.querySelector("#surveyElement"),
             data: {
-                json: json
+                surveyModel: survey
             }
         })
 	</script>
