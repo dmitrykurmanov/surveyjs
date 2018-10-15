@@ -12,7 +12,7 @@
 
 		{#if surveyModel.state === 'starting'}
 		<div class={css.body}>
-			<!-- <survey-page :id="survey.startedPage.id" :survey="survey" :page="survey.startedPage" :css="css" /> TODO-->
+			<survey-page id={surveyModel.startedPage.id} survey={surveyModel} page={surveyModel.startedPage} css={css} />
 
 			{#if surveyModel.isNavigationButtonsShowing}
 			<div class={css.footer}>
