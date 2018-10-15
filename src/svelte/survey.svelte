@@ -5,26 +5,45 @@
 		{#if hasTitle}
 		<div class={css.header}>
 			<h3>
-				<SurveyString locString={surveyModel.locTitle}/>
+				<SurveyString locString={surveyModel.locTitle} />
 			</h3>
 		</div>
-		{/if} {#if hasCompletedPage}
+		{/if}
+
+		{#if surveyModel.state === 'starting'}
+		<div class={css.body}>
+			<!-- <survey-page :id="survey.startedPage.id" :survey="survey" :page="survey.startedPage" :css="css" /> TODO-->
+
+			{#if surveyModel.isNavigationButtonsShowing}
+			<div class={css.footer}>
+				<input type="button" bind:value=surveyModel.startSurveyText class={getNavBtnClasses(css, 'start')} on:click="start()" />
+			</div>
+			{/if}
+		</div>
+		{/if}
+
+		{#if surveyModel.state === 'running'}
+		<div class={css.body}>
+			{surveyModel.state}
+		</div>
+		{/if}
+
+		{#if hasCompletedPage}
 		<div>
-			<div class={getCompletedPageClasses()}>
+			<div class={completedPageClasses()}>
 				{@html surveyModel.processedCompletedHtml}
 			</div>
+
 			{#if surveyModel.completedState != ''}
 			<div class={css.saveData.root}>
-				<div class={getCompletedStateClasses()}>
+				<div class={completedStateClasses()}>
 					<span>{surveyModel.completedStateText}</span>
-					{#if surveyModel.completedState == 'error'}
-					<input type="button" value={surveyModel.getLocString( 'saveAgainButton')} on:click="doTrySaveAgain()" class={css.saveData.saveAgainButton}
-					/> {/if}
 
+					{#if surveyModel.completedState == 'error'}
+					{/if}
 				</div>
 			</div>
 			{/if}
-
 		</div>
 		{/if}
 
@@ -46,14 +65,18 @@
 	  },
 	  components: {
 	    SurveyString
-		},
-		oncreate() {
-			this.su
-
-			this.interval = setInterval(() => {
-				this.set({ time: new Date() });
-			}, 1000);
-		},
+	  },
+	  oncreate() {
+	    this.get().surveyModel.onCurrentPageChanged.add((sender, options) => {
+	      this.set({ surveyModel: sender });
+	    });
+	    this.get().surveyModel.onVisibleChanged.add((sender, options) => {
+	      this.set({ surveyModel: sender });
+	    });
+	    this.get().surveyModel.onValueChanged.add((sender, options) => {
+	      this.set({ surveyModel: sender });
+	    });
+	  },
 	  computed: {
 	    hasTitle: ({ surveyModel }) => {
 	      return !!surveyModel.title && surveyModel.showTitle;
@@ -61,16 +84,24 @@
 	    hasCompletedPage: ({ surveyModel }) => {
 	      return surveyModel.showCompletedPage && surveyModel.state === "completed";
 	    },
-	    getCompletedPageClasses: ({ css }) => {
+	    completedPageClasses: ({ css }) => {
 	      return css.body + " " + css.completedPage;
 	    },
-	    getCompletedStateClasses: ({ css, surveyModel }) => {
+	    completedStateClasses: ({ css, surveyModel }) => {
 	      return css.saveData[surveyModel.completedState];
 	    }
 	  },
 	  methods: {
 	    doTrySaveAgain() {
 	      this.get().surveyModel.doComplete();
+	    },
+	    start() {
+	      this.get().surveyModel.start();
+	    }
+	  },
+	  helpers: {
+	    getNavBtnClasses(css, btnType) {
+	      return (css.navigationButton + " " + css.navigation[btnType]).trim();
 	    }
 	  }
 	};
