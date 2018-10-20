@@ -19,6 +19,7 @@
 <script>
   import SurveyString from "./string.svelte";
   import SurveyRow from "./row.svelte";
+  import { applyShowHideClass } from "./helpers";
 
   export default {
     data() {
@@ -47,9 +48,7 @@
       }
     },
     helpers: {
-      applyShowHideClass(condition) {
-        return condition ? "show" : "hide";
-      }
+      applyShowHideClass
     }
   };
 </script>
