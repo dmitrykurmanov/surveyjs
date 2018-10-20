@@ -3,48 +3,48 @@
 	<div class="sv_container">
 
 		{#if hasTitle}
-		<div class={css.header}>
-			<h3>
-				<SurveyString locString={surveyModel.locTitle} />
-			</h3>
-		</div>
+			<div class={css.header}>
+				<h3>
+					<SurveyString locString={surveyModel.locTitle} />
+				</h3>
+			</div>
 		{/if}
 
 		{#if surveyModel.state === 'starting'}
-		<div class={css.body}>
-			<survey-page id={surveyModel.startedPage.id} survey={surveyModel} page={surveyModel.startedPage} css={css} />
+			<div class={css.body}>
+				<survey-page id={surveyModel.startedPage.id} survey={surveyModel} page={surveyModel.startedPage} css={css} />
 
-			{#if surveyModel.isNavigationButtonsShowing}
-			<div class={css.footer}>
-				<input type="button" bind:value=surveyModel.startSurveyText class={getNavBtnClasses(css, 'start')} on:click="start()" />
+				{#if surveyModel.isNavigationButtonsShowing}
+					<div class={css.footer}>
+						<input type="button" bind:value=surveyModel.startSurveyText class={getNavBtnClasses(css, 'start')} on:click="start()" />
+					</div>
+				{/if}
 			</div>
-			{/if}
-		</div>
 		{/if}
 
 		{#if surveyModel.state === 'running'}
-		<div class={css.body}>
-			{surveyModel.state}
-		</div>
+			<div class={css.body}>
+				{surveyModel.state}
+			</div>
 		{/if}
 
 		{#if hasCompletedPage}
-		<div>
-			<div class={completedPageClasses()}>
-				{@html surveyModel.processedCompletedHtml}
-			</div>
-
-			{#if surveyModel.completedState != ''}
-			<div class={css.saveData.root}>
-				<div class={completedStateClasses()}>
-					<span>{surveyModel.completedStateText}</span>
-
-					{#if surveyModel.completedState == 'error'}
-					{/if}
+			<div>
+				<div class={completedPageClasses()}>
+					{@html surveyModel.processedCompletedHtml}
 				</div>
+
+				{#if surveyModel.completedState != ''}
+					<div class={css.saveData.root}>
+						<div class={completedStateClasses()}>
+							<span>{surveyModel.completedStateText}</span>
+
+							{#if surveyModel.completedState == 'error'}
+							{/if}
+						</div>
+					</div>
+				{/if}
 			</div>
-			{/if}
-		</div>
 		{/if}
 
 

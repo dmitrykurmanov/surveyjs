@@ -1,13 +1,25 @@
 <div class={css.page.root}>
-    <h4 v-show="hasTitle" :class="css.pageTitle"><survey-string :locString="page.locTitle"/></h4>
-    <div v-show="hasDescription" :class="css.pageDescription"><survey-string :locString="page.locDescription"/></div>
-    <div v-for="(row, index) in rows" v-if="row.visible" :key="page.id + '_' + index" :class="css.row">
-        <survey-row :row="row" :survey="survey" :css="css"></survey-row>
-    </div>
+	<h4 class={applyShowHideClass(hasTitle) + " " + css.pageTitle}>
+		<SurveyString locString={page.locTitle} />
+	</h4>
+	<div class={applyShowHideClass(hasDescription) + " " + css.pageDescription}>
+		<SurveyString locString={page.locDescription} />
+	</div>
+	{#each rows as row}
+    {#if row.visible}
+      <div class={css.row}>
+        <SurveyRow row={row} survey={survey} css={css} />
+      </div>
+    {/if}
+  {/each}
+
 </div>
 
 
 <script>
+  import SurveyString from "./string.svelte";
+  import SurveyRow from "./row.svelte";
+
   export default {
     data() {
       return {
@@ -15,6 +27,10 @@
         css: null,
         page: null
       };
+    },
+    components: {
+      SurveyString,
+      SurveyRow
     },
     computed: {
       hasTitle: ({ survey, page }) => {
@@ -29,15 +45,20 @@
       rows: ({ page }) => {
         return page.rows;
       }
+    },
+    helpers: {
+      applyShowHideClass(condition) {
+        return condition ? "show" : "hide";
+      }
     }
   };
 </script>
 
 <style>
-    .hide {
-      visibility: hidden;
-    }
-    .show {
-      visibility: visible;
-    }
+  .hide {
+    visibility: hidden;
+  }
+  .show {
+    visibility: visible;
+  }
 </style>
