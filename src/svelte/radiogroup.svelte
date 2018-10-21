@@ -24,7 +24,7 @@
 
 <script>
   import SurveyString from "./string.svelte";
-  import OtherChoice from "otherChoice.svelte";
+  import OtherChoice from "./otherChoice.svelte";
   import { applyShowHideClass } from "./helpers";
 
   export default {
@@ -57,7 +57,7 @@
     },
     computed: {
       choicesCount: ({ question }) => {
-        return this.question.visibleChoices.length - 1;
+        return question.visibleChoices.length - 1;
       }
     }
   };

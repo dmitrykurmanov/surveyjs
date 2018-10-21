@@ -49,8 +49,8 @@
   import { applyShowHideClass } from "./helpers";
   import SurveyString from "./string.svelte";
   import SurveyErrors from "./errors.svelte";
-  import Radiogroup from "radiogroup.svelte";
-  import OtherChoice from "otherChoice.svelte";
+  import Radiogroup from "./radiogroup.svelte";
+  import OtherChoice from "./otherChoice.svelte";
 
   export default {
     data() {

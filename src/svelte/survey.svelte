@@ -12,7 +12,7 @@
 
 		{#if surveyModel.state === 'starting'}
 			<div class={css.body}>
-				<survey-page id={surveyModel.startedPage.id} survey={surveyModel} page={surveyModel.startedPage} css={css} />
+				<SurveyPage id={surveyModel.startedPage.id} survey={surveyModel} page={surveyModel.startedPage} css={css} />
 
 				{#if surveyModel.isNavigationButtonsShowing}
 					<div class={css.footer}>
@@ -24,7 +24,16 @@
 
 		{#if surveyModel.state === 'running'}
 			<div class={css.body}>
-				{surveyModel.state}
+				<!-- <survey-progress v-if="survey.isShowProgressBarOnTop" :survey="survey" :css="css"/> -->
+				<!-- <survey-timerpanel v-if="survey.isTimerPanelShowingOnTop" :survey="survey" :css="css"/> -->
+				<SurveyPage id={surveyModel.currentPage.id} survey={surveyModel} page={surveyModel.currentPage} css={css} />
+				<!-- <survey-timerpanel v-if="survey.isTimerPanelShowingOnBottom" :survey="survey" :css="css"/> -->
+				<!-- <survey-progress style="margin-top: 1em" v-if="survey.isShowProgressBarOnBottom" :survey="survey" :css="css"/> -->
+				<!-- <div v-if="survey.isNavigationButtonsShowing" :class="css.footer">
+						<input type="button" :value="survey.pagePrevText" v-show="!survey.isFirstPage && survey.isShowPrevButton" :class="getNavBtnClasses('prev')" @click="prevPage"/>
+						<input type="button" :value="survey.pageNextText" v-show="!survey.isLastPage" :class="getNavBtnClasses('next')" @click="nextPage"/>
+						<input v-if="survey.isEditMode" type="button" :value="survey.completeText" v-show="survey.isLastPage" :class="getNavBtnClasses('complete')" @click="completeLastPage"/>
+				</div> -->
 			</div>
 		{/if}
 
@@ -55,6 +64,7 @@
 	import { surveyCss } from "../defaultCss/cssstandard";
 	import { QuestionRadiogroupModel } from "../question_radiogroup";
 	import SurveyString from "./string.svelte";
+	import SurveyPage from "./page.svelte";
 
 	export default {
 	  data() {
@@ -64,7 +74,8 @@
 	    };
 	  },
 	  components: {
-	    SurveyString
+			SurveyString,
+			SurveyPage
 	  },
 	  oncreate() {
 	    this.get().surveyModel.onCurrentPageChanged.add((sender, options) => {
