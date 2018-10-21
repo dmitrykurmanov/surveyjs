@@ -15,21 +15,21 @@
     {/if}
 
     <div class={element.hasTitleOnLeft ? 'content-left' : ''}>
-        {#if hasErrorsOnTop}
-            <!-- <survey-errors question={element}/> -->
+        {#if hasErrorsOnTop}           
+            <SurveyErrors question={element} />
         {/if}
 
-        <!-- <component :is="getWidgetComponentName(element)" :question="element" :css="css"/> -->
+        <svelte:component this={dynamicComponent} question={element} css={css}/>
         
         {#if element.hasComment}
             <div>
                 <div>{element.commentText}</div>
-                <!-- <survey-other-choice commentClass={css.comment} question={element}/> -->
+                <OtherChoice commentClass={css.comment} question={element} />
             </div>
         {/if}
 
         {#if hasErrorsOnBottom}
-            <!-- <survey-errors question={element}/> -->
+            <SurveyErrors question={element} />
         {/if}
 
         {#if element.hasTitleOnBottom}
@@ -48,6 +48,9 @@
 <script>
   import { applyShowHideClass } from "./helpers";
   import SurveyString from "./string.svelte";
+  import SurveyErrors from "./errors.svelte";
+  import Radiogroup from "radiogroup.svelte";
+  import OtherChoice from "otherChoice.svelte";
 
   export default {
     data() {
@@ -58,15 +61,11 @@
       };
     },
     components: {
-      SurveyString
+      SurveyString,
+      SurveyErrors,
+      OtherChoice
     },
     methods: {
-      getWidgetComponentName() {
-        if (this.element.customWidget) {
-          return "survey-customwidget";
-        }
-        return "survey-" + this.element.getTemplate();
-      },
       getQuestionClass() {
         if (!!this.element.errors && this.element.errors.length > 0) {
           return this.css.question.hasError;
@@ -83,16 +82,15 @@
       },
       hasErrorsOnBottom: ({ survey, element }) => {
         return !element.isPanel && survey.questionErrorLocation === "bottom";
+      },
+      dynamicComponent: ({ element }) => {
+        // if (element.customWidget) {
+        //   return "survey-customwidget";
+        // }
+        // return "survey-" + element.getTemplate(); TODO
+
+        return Radiogroup;
       }
     }
   };
 </script>
-
-<style>
-  .hide {
-    visibility: hidden;
-  }
-  .show {
-    visibility: visible;
-  }
-</style>

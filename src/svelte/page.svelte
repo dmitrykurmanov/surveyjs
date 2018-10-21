@@ -52,12 +52,3 @@
     }
   };
 </script>
-
-<style>
-  .hide {
-    visibility: hidden;
-  }
-  .show {
-    visibility: visible;
-  }
-</style>

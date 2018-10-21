@@ -1,5 +1,5 @@
 <div>
-	{#each row.elements as element (element.idValue)}
+	  {#each row.elements as element (element.idValue)}
         {#if element.visible}
             <SurveyElement class={questionRootClass} id={element.id} style="paddingLeft: {getIndentSize(element, element.indent)}; paddingRight: {getIndentSize(element, element.rightIndent)}; width: {element.renderWidth}" element={element} survey={survey} css={css} />
         {/if}
@@ -34,12 +34,3 @@
     }
   };
 </script>
-
-<style>
-  .hide {
-    visibility: hidden;
-  }
-  .show {
-    visibility: visible;
-  }
-</style>

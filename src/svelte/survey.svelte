@@ -106,3 +106,12 @@
 	  }
 	};
 </script>
+
+<style>
+  :global(.sjs-hide) {
+    visibility: hidden;
+  }
+  :global(.sjs-show) {
+    visibility: visible;
+  }
+</style>
