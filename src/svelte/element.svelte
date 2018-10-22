@@ -1,4 +1,4 @@
-<div class={getQuestionClass()}>
+<div class={getQuestionClass(element, css)}>
     {#if element.hasTitleOnLeftTop}
         <div class={element.hasTitleOnLeft ? 'title-left' : ''}>
             {#if element.hasTitle}
@@ -65,16 +65,14 @@
       SurveyErrors,
       OtherChoice
     },
-    methods: {
-      getQuestionClass() {
-        if (!!this.element.errors && this.element.errors.length > 0) {
-          return this.css.question.hasError;
+    helpers: {
+      applyShowHideClass,
+      getQuestionClass(element, css) {
+        if (!!element.errors && element.errors.length > 0) {
+          return css.question.hasError;
         }
         return "";
       }
-    },
-    helpers: {
-      applyShowHideClass
     },
     computed: {
       hasErrorsOnTop: ({ survey, element }) => {

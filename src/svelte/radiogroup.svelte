@@ -1,6 +1,6 @@
 <fieldset class={question.cssClasses.root}>
 	{#each question.visibleChoices as item, index}
-        <div class={getItemClass(item)} >
+        <div class={getItemClass(question, item)} >
             <label class={question.cssClasses.label}>
                 <input type="radio" name={question.name + '_' + question.id} bind:value=item.value id={question.inputId} disabled={question.isReadOnly} aria-label={item.locText.renderedHtml} class={question.cssClasses.itemControl}/>
                 <span class={question.cssClasses.materialDecorator}></span>
@@ -39,21 +39,21 @@
       OtherChoice
     },
     methods: {
-      getItemClass(item) {
-        var itemClass =
-          this.question.cssClasses.item +
-          (this.question.colCount === 0
-            ? " sv_q_radiogroup_inline"
-            : " sv-q-col-" + this.question.colCount);
-        if (item.value === this.question.value) itemClass += " checked";
-        return itemClass;
-      },
       doClear() {
         this.question.clearValue();
       }
     },
     helpers: {
-      applyShowHideClass
+      applyShowHideClass,
+      getItemClass(question, item) {
+        var itemClass =
+          question.cssClasses.item +
+          (question.colCount === 0
+            ? " sv_q_radiogroup_inline"
+            : " sv-q-col-" + question.colCount);
+        if (item.value === question.value) itemClass += " checked";
+        return itemClass;
+      }
     },
     computed: {
       choicesCount: ({ question }) => {
