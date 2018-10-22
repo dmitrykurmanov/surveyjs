@@ -38,7 +38,7 @@
             </h5>
         {/if}
         {#if element.hasDescription}
-            <div class={element.cssClasses.description + " " + applyShowHideClass(element.hasTitleOnBottom)}>
+            <div class:sjs-hide="element.hasTitleOnBottom" class={element.cssClasses.description}>
                 <SurveyString locString={element.locDescription} />
             </div>
         {/if}
@@ -46,7 +46,6 @@
 </div>
 
 <script>
-  import { applyShowHideClass } from "./helpers";
   import SurveyString from "./string.svelte";
   import SurveyErrors from "./errors.svelte";
   import Radiogroup from "./radiogroup.svelte";
@@ -66,7 +65,6 @@
       OtherChoice
     },
     helpers: {
-      applyShowHideClass,
       getQuestionClass(element, css) {
         if (!!element.errors && element.errors.length > 0) {
           return css.question.hasError;

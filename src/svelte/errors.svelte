@@ -1,4 +1,4 @@
-<div role="alert" class={classes}>
+<div role="alert" class:sjs-hide="!!question.errors && question.errors.length > 0" class={classes}>
     {#each question.errors as error}   
         <div>
             <span class={question.cssClasses ? question.cssClasses.error.icon : 'panel-error-icon'} aria-hidden="true"></span>
@@ -11,7 +11,6 @@
 
 
 <script>
-  import { applyShowHideClass } from "./helpers";
   import SurveyString from "./string.svelte";
 
   export default {
@@ -21,18 +20,13 @@
       };
     },
     components: {
-        SurveyString
+      SurveyString
     },
     computed: {
       classes: ({ question }) => {
-        const showHideCls = applyShowHideClass(
-          !!question.errors && question.errors.length > 0
-        );
-        const errCls = question.cssClasses
+        return question.cssClasses
           ? question.cssClasses.error.root
           : "panel-error-root";
-
-        return showHideCls + " " + errCls;
       }
     }
   };

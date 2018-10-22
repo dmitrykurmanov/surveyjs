@@ -4,7 +4,3 @@ export const getIndentSize = (question: any, indent: any): any => {
   if (!css) return "";
   return indent * css.question.indent + "px";
 };
-
-export const applyShowHideClass = (condition: any): any => {
-  return condition ? "show" : "hide";
-};

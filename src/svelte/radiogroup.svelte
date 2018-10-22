@@ -8,8 +8,10 @@
                 <span class={question.cssClasses.controlLabel}>
                   <SurveyString locString={item.locText} />
                 </span>
-                {#if index == choicesCount}           
-                    <OtherChoice question={question} class={applyShowHideClass(question.hasOther && question.isOtherSelected && index === choicesCount)}/>
+                {#if index == choicesCount}     
+                    <div class:sjs-hide="question.hasOther && question.isOtherSelected && index === choicesCount">
+                      <OtherChoice question={question} }/>
+                    </div>
                 {/if}
             </label>
         </div>
@@ -25,7 +27,6 @@
 <script>
   import SurveyString from "./string.svelte";
   import OtherChoice from "./otherChoice.svelte";
-  import { applyShowHideClass } from "./helpers";
 
   export default {
     data() {
@@ -44,7 +45,6 @@
       }
     },
     helpers: {
-      applyShowHideClass,
       getItemClass(question, item) {
         var itemClass =
           question.cssClasses.item +

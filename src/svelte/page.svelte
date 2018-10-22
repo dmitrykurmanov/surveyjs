@@ -1,8 +1,8 @@
 <div class={css.page.root}>
-	<h4 class={applyShowHideClass(hasTitle) + " " + css.pageTitle}>
+	<h4 class:sjs-hide="hasTitle" class={css.pageTitle}>
 		<SurveyString locString={page.locTitle} />
 	</h4>
-	<div class={applyShowHideClass(hasDescription) + " " + css.pageDescription}>
+	<div class:sjs-hide="hasDescription" class={css.pageDescription}>
 		<SurveyString locString={page.locDescription} />
 	</div>
 	{#each rows as row}
@@ -19,7 +19,6 @@
 <script>
   import SurveyString from "./string.svelte";
   import SurveyRow from "./row.svelte";
-  import { applyShowHideClass } from "./helpers";
 
   export default {
     data() {
@@ -46,9 +45,6 @@
       rows: ({ page }) => {
         return page.rows;
       }
-    },
-    helpers: {
-      applyShowHideClass
     }
   };
 </script>

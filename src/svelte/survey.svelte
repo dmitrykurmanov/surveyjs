@@ -74,8 +74,8 @@
 	    };
 	  },
 	  components: {
-			SurveyString,
-			SurveyPage
+	    SurveyString,
+	    SurveyPage
 	  },
 	  oncreate() {
 	    this.get().surveyModel.onCurrentPageChanged.add((sender, options) => {
@@ -121,8 +121,5 @@
 <style>
   :global(.sjs-hide) {
     visibility: hidden;
-  }
-  :global(.sjs-show) {
-    visibility: visible;
   }
 </style>
