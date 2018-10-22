@@ -227,7 +227,14 @@ module.exports = function(options) {
         {
           test: /\.svelte$/,
           exclude: /node_modules/,
-          use: "svelte-loader"
+          use: [
+            {
+              loader: "svelte-loader",
+              options: {
+                dev: options.buildType === "dev"
+              }
+            }
+          ]
         },
         {
           test: /\.vue$/,
