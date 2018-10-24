@@ -2,7 +2,7 @@
 	{#each question.visibleChoices as item, index}
         <div class={getItemClass(question, item)} >
             <label class={question.cssClasses.label}>
-                <input type="radio" name={question.name + '_' + question.id} bind:value=item.value id={question.inputId} disabled={question.isReadOnly} aria-label={item.locText.renderedHtml} class={question.cssClasses.itemControl}/>
+                <input type="radio" name={question.name + '_' + question.id} value={item.value} on:change="setValue(this.value)" id={question.inputId} disabled={question.isReadOnly} aria-label={item.locText.renderedHtml} class={question.cssClasses.itemControl}/>
                 <span class={question.cssClasses.materialDecorator}></span>
                 <span class="check"></span>
                 <span class={question.cssClasses.controlLabel}>
@@ -41,7 +41,10 @@
     },
     methods: {
       doClear() {
-        this.question.clearValue();
+        this.get().question.clearValue();
+      },
+      setValue(newValue) {
+        this.get().question.value = newValue;
       }
     },
     helpers: {

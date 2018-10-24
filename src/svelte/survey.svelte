@@ -109,6 +109,15 @@
 		    this.get().surveyModel.onValueChanged.add((sender, options) => {
 		      this.set({ surveyModel: sender });
 		    });
+		    this.get().surveyModel.onComplete.add((sender, options) => {
+		      this.set({ surveyModel: sender });
+		    });
+		    this.get().surveyModel.onPartialSend.add((sender, options) => {
+		      this.set({ surveyModel: sender });
+				});
+				this.get().surveyModel.onPageVisibleChanged.add((sender, options) => {
+		      this.set({ surveyModel: sender });
+				});
 		  },
 		  computed: {
 		    hasTitle: ({ surveyModel }) => {
