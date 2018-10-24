@@ -35,7 +35,7 @@
 							<input type="button" class:sjs-hide="surveyModel.isFirstPage || !surveyModel.isShowPrevButton" value={surveyModel.pagePrevText} class={getNavBtnClasses(css, 'prev')} on:click="prevPage()"/>
 							<input type="button" class:sjs-hide="surveyModel.isLastPage" value={surveyModel.pageNextText} class={getNavBtnClasses(css, 'next')} on:click="nextPage()"/>
 							{#if surveyModel.isEditMode}
-							<input type="button" class:sjs-hide="!surveyModel.isLastPage" value={surveyModel.completeTex} class={getNavBtnClasses(css, 'complete')} on:click="completeLastPage()"/>
+							<input type="button" class:sjs-hide="!surveyModel.isLastPage" value={surveyModel.completeText} class={getNavBtnClasses(css, 'complete')} on:click="completeLastPage()"/>
 							{/if}
 					</div>
 				{/if}
@@ -44,7 +44,7 @@
 
 		{#if hasCompletedPage}
 			<div>
-				<div class={completedPageClasses()}>
+				<div class={completedPageClasses}>
 					{@html surveyModel.processedCompletedHtml}
 				</div>
 
