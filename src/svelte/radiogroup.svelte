@@ -8,8 +8,8 @@
                 <span class={question.cssClasses.controlLabel}>
                   <SurveyString locString={item.locText} />
                 </span>
-                {#if index == choicesCount}     
-                    <div class:sjs-hide="question.hasOther && question.isOtherSelected && index === choicesCount">
+                {#if index == choicesCount}
+                    <div class:sjs-hide="!question.hasOther || !question.isOtherSelected">
                       <OtherChoice question={question} }/>
                     </div>
                 {/if}

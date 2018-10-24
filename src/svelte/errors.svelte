@@ -1,4 +1,4 @@
-<div role="alert" class:sjs-hide="!!question.errors && question.errors.length > 0" class={classes}>
+<div role="alert" class:sjs-hide="!question.errors || question.errors.length === 0" class={classes}>
     {#each question.errors as error}   
         <div>
             <span class={question.cssClasses ? question.cssClasses.error.icon : 'panel-error-icon'} aria-hidden="true"></span>

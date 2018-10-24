@@ -1,8 +1,8 @@
 <div class={css.page.root}>
-	<h4 class:sjs-hide="hasTitle" class={css.pageTitle}>
+	<h4 class:sjs-hide="!hasTitle" class={css.pageTitle}>
 		<SurveyString locString={page.locTitle} />
 	</h4>
-	<div class:sjs-hide="hasDescription" class={css.pageDescription}>
+	<div class:sjs-hide="!hasDescription" class={css.pageDescription}>
 		<SurveyString locString={page.locDescription} />
 	</div>
 	{#each rows as row}

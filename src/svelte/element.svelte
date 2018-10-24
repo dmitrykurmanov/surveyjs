@@ -38,7 +38,7 @@
             </h5>
         {/if}
         {#if element.hasDescription}
-            <div class:sjs-hide="element.hasTitleOnBottom" class={element.cssClasses.description}>
+            <div class:sjs-hide="!element.hasTitleOnBottom" class={element.cssClasses.description}>
                 <SurveyString locString={element.locDescription} />
             </div>
         {/if}
