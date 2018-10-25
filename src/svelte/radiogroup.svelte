@@ -27,17 +27,25 @@
 <script>
   import SurveyString from "./string.svelte";
   import OtherChoice from "./otherChoice.svelte";
+  import { listenArrayChanged } from "./utils";
 
   export default {
     data() {
       return {
         question: null,
-        css: null
+        css: null,
+        _state: 0
       };
     },
     components: {
       SurveyString,
       OtherChoice
+    },
+    oncreate() {
+      listenArrayChanged(this.get().question, () => {
+        const newState = ++this.get()._state;
+        this.set({ _state: newState });
+      });
     },
     methods: {
       doClear() {

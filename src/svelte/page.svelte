@@ -19,18 +19,26 @@
 <script>
   import SurveyString from "./string.svelte";
   import SurveyRow from "./row.svelte";
+  import { listenArrayChanged } from "./utils";
 
   export default {
     data() {
       return {
         survey: null,
         css: null,
-        page: null
+        page: null,
+        _state: 0
       };
     },
     components: {
       SurveyString,
       SurveyRow
+    },
+    oncreate() {
+      listenArrayChanged(this.get().page, () => {
+        const newState = ++this.get()._state;
+        this.set({ _state: newState });
+      });
     },
     computed: {
       hasTitle: ({ survey, page }) => {

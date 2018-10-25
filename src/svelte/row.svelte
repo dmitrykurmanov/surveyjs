@@ -7,7 +7,7 @@
 </div>
 
 <script>
-  import { getIndentSize } from "./helpers";
+  import { getIndentSize } from "./utils";
   import SurveyElement from "./element.svelte";
 
   export default {
