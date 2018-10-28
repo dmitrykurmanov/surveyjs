@@ -50,6 +50,7 @@
   import SurveyErrors from "./errors.svelte";
   import Radiogroup from "./radiogroup.svelte";
   import OtherChoice from "./otherChoice.svelte";
+  import { listenArrayChanged } from "./utils";
 
   export default {
     data() {
@@ -63,6 +64,12 @@
       SurveyString,
       SurveyErrors,
       OtherChoice
+    },
+    oncreate() {
+      const element = this.get().element;
+      listenArrayChanged(element, () => {
+        this.set({ element, ...element });
+      });
     },
     helpers: {
       getQuestionClass(element, css) {

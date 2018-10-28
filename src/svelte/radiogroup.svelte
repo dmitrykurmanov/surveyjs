@@ -33,19 +33,12 @@
     data() {
       return {
         question: null,
-        css: null,
-        _state: 0
+        css: null
       };
     },
     components: {
       SurveyString,
       OtherChoice
-    },
-    oncreate() {
-      listenArrayChanged(this.get().question, () => {
-        const newState = ++this.get()._state;
-        this.set({ _state: newState });
-      });
     },
     methods: {
       doClear() {
