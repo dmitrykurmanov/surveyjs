@@ -5,7 +5,7 @@
     <title>Welcome to Svelte</title>
 
     <script src="../../packages/survey-svelte/survey.svelte.js">
-</script>
+    </script>
 </head>
 
 <body>
@@ -19,6 +19,8 @@
                     name: "car",
                     title: "What car are you driving?",
                     isRequired: true,
+                    hasOther: true,
+                    otherText: "my other text",
                     startSurveyText: "Start Quiz",
                     colCount: 4,
                     choices: [
