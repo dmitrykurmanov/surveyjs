@@ -48,9 +48,11 @@
 <script>
   import SurveyString from "./string.svelte";
   import SurveyErrors from "./errors.svelte";
-  import Radiogroup from "./radiogroup.svelte";
   import OtherChoice from "./otherChoice.svelte";
   import { listenArrayChanged } from "./utils";
+
+  import Radiogroup from "./radiogroup.svelte";
+  import Checkbox from "./checkbox.svelte";
 
   export default {
     data() {
@@ -87,12 +89,15 @@
         return !element.isPanel && survey.questionErrorLocation === "bottom";
       },
       dynamicComponent: ({ element }) => {
-        // if (element.customWidget) {
-        //   return "survey-customwidget";
-        // }
-        // return "survey-" + element.getTemplate(); TODO
+        if (element.customWidget) {
+          //   return CustomWidget; //TODO
+          return;
+        }
 
-        return Radiogroup;
+        if (element.getTemplate() === "radiogroup") return Radiogroup;
+        if (element.getTemplate() === "checkbox") return Checkbox;
+
+        return null;
       }
     }
   };
