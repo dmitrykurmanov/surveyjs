@@ -51,8 +51,8 @@
   import OtherChoice from "./otherChoice.svelte";
   import { listenArrayChanged } from "./utils";
 
-  import Radiogroup from "./radiogroup.svelte";
-  import Checkbox from "./checkbox.svelte";
+  import radiogroup from "./radiogroup.svelte";
+  import checkbox from "./checkbox.svelte";
 
   export default {
     data() {
@@ -67,7 +67,7 @@
       SurveyErrors,
       OtherChoice
     },
-    oncreate() {
+    onupdate() {
       const element = this.get().element;
       listenArrayChanged(element, () => {
         this.set({ element, ...element });
@@ -89,15 +89,8 @@
         return !element.isPanel && survey.questionErrorLocation === "bottom";
       },
       dynamicComponent: ({ element }) => {
-        if (element.customWidget) {
-          //   return CustomWidget; //TODO
-          return;
-        }
-
-        if (element.getTemplate() === "radiogroup") return Radiogroup;
-        if (element.getTemplate() === "checkbox") return Checkbox;
-
-        return null;
+        const components = {radiogroup, checkbox};
+        return components[element.getTemplate()];
       }
     }
   };

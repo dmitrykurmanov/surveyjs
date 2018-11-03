@@ -5,75 +5,77 @@
     <title>Welcome to Svelte</title>
 
     <script src="../../packages/survey-svelte/survey.svelte.js">
-    </script>
+</script>
 </head>
 
 <body>
     <div id="surveyElement"></div>
     <script>
-        // var json = {
-        //     title: "Hey",
-        //     questions: [
-        //         {
-        //             type: "radiogroup",
-        //             name: "car",
-        //             title: "What car are you driving?",
-        //             isRequired: true,
-        //             hasOther: true,
-        //             otherText: "my other text",
-        //             startSurveyText: "Start Quiz",
-        //             colCount: 4,
-        //             choices: [
-        //                 "None",
-        //                 "Ford",
-        //                 "Vauxhall",
-        //                 "Volkswagen",
-        //                 "Nissan",
-        //                 "Audi",
-        //                 "Mercedes-Benz",
-        //                 "BMW",
-        //                 "Peugeot",
-        //                 "Toyota",
-        //                 "Citroen"
-        //             ]
-        //         }
-        //     ]
-        // };
-
         var json = {
-            questions: [
+            title: "Hey",
+            pages: [
                 {
-                    type: "checkbox",
-                    name: "car",
-                    title: "What car are you driving?",
-                    isRequired: true,
-                    hasNone: true,
-                    colCount: 4,
-                    hasSelectAll: true,
-                    choices: [
-                        "Ford",
-                        "Vauxhall",
-                        "Volkswagen",
-                        "Nissan",
-                        "Audi",
-                        "Mercedes-Benz",
-                        "BMW",
-                        "Peugeot",
-                        "Toyota",
-                        "Citroen"
+                    questions: [
+                        {
+                            type: "radiogroup",
+                            name: "car",
+                            title: "What car are you driving?",
+                            isRequired: true,
+                            hasOther: true,
+                            otherText: "my other text",
+                            startSurveyText: "Start Quiz",
+                            colCount: 4,
+                            choices: [
+                                "None",
+                                "Ford",
+                                "Vauxhall",
+                                "Volkswagen",
+                                "Nissan",
+                                "Audi",
+                                "Mercedes-Benz",
+                                "BMW",
+                                "Peugeot",
+                                "Toyota",
+                                "Citroen"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    questions: [
+                        {
+                            type: "checkbox",
+                            name: "car22",
+                            title: "What car are you driving?",
+                            isRequired: true,
+                            hasNone: true,
+                            colCount: 4,
+                            hasSelectAll: true,
+                            choices: [
+                                "Ford",
+                                "Vauxhall",
+                                "Volkswagen",
+                                "Nissan",
+                                "Audi",
+                                "Mercedes-Benz",
+                                "BMW",
+                                "Peugeot",
+                                "Toyota",
+                                "Citroen"
+                            ]
+                        }
                     ]
                 }
             ]
+            
         };
-
-
 
 
         window.survey = new Survey.Model(json);
 
-        survey.data = {
-            car: ["Mercedes-Benz"]
-        }
+        // survey.data = {
+        //     car: "Mercedes-Benz"
+        // };
 
         var svelteSurvey = new Survey.Survey({
             target: document.querySelector("#surveyElement"),

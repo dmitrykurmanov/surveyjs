@@ -41,6 +41,11 @@
       SurveyString,
       OtherChoice
     },
+    computed: {
+      choicesCount: ({ question }) => {
+        return question.visibleChoices.length - 1;
+      }
+    },
     helpers: {
       getItemClass(question, item) {
         var itemClass =
