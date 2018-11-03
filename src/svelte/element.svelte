@@ -53,6 +53,7 @@
 
   import radiogroup from "./radiogroup.svelte";
   import checkbox from "./checkbox.svelte";
+  import comment from "./comment.svelte";
 
   export default {
     data() {
@@ -89,7 +90,7 @@
         return !element.isPanel && survey.questionErrorLocation === "bottom";
       },
       dynamicComponent: ({ element }) => {
-        const components = {radiogroup, checkbox};
+        const components = { radiogroup, checkbox, comment };
         return components[element.getTemplate()];
       }
     }

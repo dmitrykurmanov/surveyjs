@@ -17,3 +17,8 @@ export const listenArrayChanged = (element: any, handler: any): any => {
 
   element.iteratePropertiesHash(doIterate);
 };
+
+export const getMaxLength = (maxLengthValue:any): any => {
+  if (maxLengthValue === null) return 524288;
+  return maxLengthValue;
+};

@@ -29,7 +29,6 @@
 <script>
   import SurveyString from "./string.svelte";
   import OtherChoice from "./otherChoice.svelte";
-  import { listenArrayChanged } from "./utils";
 
   export default {
     data() {
