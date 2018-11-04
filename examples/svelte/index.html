@@ -10,77 +10,138 @@
 
 <body>
     <div id="surveyElement"></div>
+    <div id="surveyResult"></div>
     <script>
         var json = {
-            title: "Hey",
-            pages: [
+        title: "Hey",
+        pages: [
+            {
+            questions: [
                 {
-                    questions: [
-                        {
-                            type: "comment",
-                            name: "suggestions",
-                            title: "What would make you more satisfied with the Product?"
-                        },
-                        {
-                            type: "radiogroup",
-                            name: "car",
-                            title: "What car are you driving?",
-                            isRequired: true,
-                            hasOther: true,
-                            otherText: "my other text",
-                            startSurveyText: "Start Quiz",
-                            colCount: 4,
-                            choices: [
-                                "None",
-                                "Ford",
-                                "Vauxhall",
-                                "Volkswagen",
-                                "Nissan",
-                                "Audi",
-                                "Mercedes-Benz",
-                                "BMW",
-                                "Peugeot",
-                                "Toyota",
-                                "Citroen"
-                            ]
-                        }
-                    ]
-                },
-                {
-                    questions: [
-                        {
-                            type: "checkbox",
-                            name: "car22",
-                            title: "What car are you driving?",
-                            isRequired: true,
-                            hasNone: true,
-                            colCount: 4,
-                            hasSelectAll: true,
-                            choices: [
-                                "Ford",
-                                "Vauxhall",
-                                "Volkswagen",
-                                "Nissan",
-                                "Audi",
-                                "Mercedes-Benz",
-                                "BMW",
-                                "Peugeot",
-                                "Toyota",
-                                "Citroen"
-                            ]
-                        }
-                    ]
+                type: "matrix",
+                name: "Quality",
+                isRequired: true,
+                title:
+                    "Please indicate if you agree or disagree with the following statements",
+                columns: [
+                    {
+                    value: 1,
+                    text: "Strongly Disagree"
+                    },
+                    {
+                    value: 2,
+                    text: "Disagree"
+                    },
+                    {
+                    value: 3,
+                    text: "Neutral"
+                    },
+                    {
+                    value: 4,
+                    text: "Agree"
+                    },
+                    {
+                    value: 5,
+                    text: "Strongly Agree"
+                    }
+                ],
+                rows: [
+                    {
+                    value: "affordable",
+                    text: "Product is affordable"
+                    },
+                    {
+                    value: "does what it claims",
+                    text: "Product does what it claims"
+                    },
+                    {
+                    value: "better then others",
+                    text: "Product is better than other products on the market"
+                    },
+                    {
+                    value: "easy to use",
+                    text: "Product is easy to use"
+                    }
+                ]
                 }
             ]
-            
+            },
+            {
+            questions: [
+                {
+                type: "comment",
+                name: "suggestions",
+                isRequired: true,
+                title: "What would make you more satisfied with the Product?"
+                },
+                {
+                type: "radiogroup",
+                name: "car",
+                title: "What car are you driving?",
+                isRequired: true,
+                hasOther: true,
+                otherText: "my other text",
+                startSurveyText: "Start Quiz",
+                colCount: 4,
+                choices: [
+                    "None",
+                    "Ford",
+                    "Vauxhall",
+                    "Volkswagen",
+                    "Nissan",
+                    "Audi",
+                    "Mercedes-Benz",
+                    "BMW",
+                    "Peugeot",
+                    "Toyota",
+                    "Citroen"
+                ]
+                }
+            ]
+            },
+            {
+            questions: [
+                {
+                type: "checkbox",
+                name: "car22",
+                title: "What car are you driving?",
+                isRequired: true,
+                hasNone: true,
+                colCount: 4,
+                hasSelectAll: true,
+                choices: [
+                    "Ford",
+                    "Vauxhall",
+                    "Volkswagen",
+                    "Nissan",
+                    "Audi",
+                    "Mercedes-Benz",
+                    "BMW",
+                    "Peugeot",
+                    "Toyota",
+                    "Citroen"
+                ]
+                }
+            ]
+            }
+        ]
         };
 
 
         window.survey = new Survey.Model(json);
 
-        // survey.data = {
-        //     car: "Mercedes-Benz"
-        // };
+        survey.data = {
+            car: "Mercedes-Benz",
+            suggestions: "Don't worry"
+        };
+
+        survey
+            .onComplete
+            .add(function (result) {
+                document
+                    .querySelector('#surveyResult')
+                    .innerHTML = "result: " + JSON.stringify(result.data);
+            });
 
         var svelteSurvey = new Survey.Survey({
             target: document.querySelector("#surveyElement"),
