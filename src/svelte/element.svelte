@@ -55,6 +55,7 @@
   import checkbox from "./checkbox.svelte";
   import comment from "./comment.svelte";
   import matrix from "./matrix.svelte";
+  import matrixdropdown from "./matrixdropdown.svelte";
 
   export default {
     data() {
@@ -91,7 +92,13 @@
         return !element.isPanel && survey.questionErrorLocation === "bottom";
       },
       dynamicComponent: ({ element }) => {
-        const components = { radiogroup, checkbox, comment, matrix };
+        const components = {
+          radiogroup,
+          checkbox,
+          comment,
+          matrix,
+          matrixdropdown
+        };
         return components[element.getTemplate()];
       }
     }
