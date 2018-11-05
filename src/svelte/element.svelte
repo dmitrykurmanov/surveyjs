@@ -92,6 +92,7 @@
         return !element.isPanel && survey.questionErrorLocation === "bottom";
       },
       dynamicComponent: ({ element }) => {
+        if (element.customWidget) return "customwidget";
         const components = {
           radiogroup,
           checkbox,

@@ -44,8 +44,8 @@
                     {#if canRemoveRow}
                         <td>
                             <input type="button" value={question.removeRowText}  
-                                @click="removeRowClick(row)"
-                                :class="question.cssClasses.button + ' ' + question.cssClasses.buttonRemove"  />
+                                on:click="removeRowClick(row)"
+                                class={question.cssClasses.button + ' ' + question.cssClasses.buttonRemove}  />
                         </td>
                     {/if}
                 </tr>
@@ -53,18 +53,37 @@
         </tbody>
     {/if}
     
-    <tbody v-if="!isColumnsHorizontal">
-        <tr v-for="(column, columnIndex) in question.visibleColumns" :key="question.inputId + '_' + columnIndex">
-            <th v-if="question.showHeader"><SurveyString :locString="column.locTitle"/></th>
-            <survey-matrixcell :question="question" :cell="cell" v-for="cell in getCellsByColumn(columnIndex)" :key="columnIndex + '_' + cell.question.id"/>
-        </tr>
-        <tr v-if="canRemoveRow">
-            <td v-if="question.showHeader"></td>
-            <td v-for="(row, rowIndex) in rows" :key="'removeRow' + rowIndex">
-                <input type="button" :class="question.cssClasses.button + ' ' + question.cssClasses.buttonRemove" :value="question.removeRowText" @click="removeRowClick(row)" />
-            </td>
-        </tr>
-    </tbody>
+    {#if !isColumnsHorizontal}
+        <tbody>
+            {#each question.visibleColumns as column, columnIndex}
+                <tr key={question.inputId + '_' + columnIndex}>
+                    {#if question.showHeader}
+                        <th><SurveyString locString={column.locTitle}/></th>
+                    {/if}
+                    {#each getCellsByColumn(columnIndex) as cell}
+                        <MatrixCell question={question} cell={cell}
+                            key={columnIndex + '_' + cell.question.id}/>
+                    {/each}                
+                </tr>
+            {/each}
+
+            {#if canRemoveRow}
+                <tr>
+                    {#if question.showHeader}
+                        <td></td>
+                    {/if}
+
+                    {#each rows as row, rowIndex}
+                        <td key={'removeRow' + rowIndex}>
+                            <input type="button" value={question.removeRowText} 
+                                on:click="removeRowClick(row)"
+                                class={question.cssClasses.button + ' ' + question.cssClasses.buttonRemove} />
+                        </td>
+                    {/each}
+                </tr>
+            {/if}
+        </tbody>
+    {/if}
 </table>
     
 <script>
@@ -79,6 +98,7 @@
       };
     },
     components: {
+      SurveyString,
       MatrixCell
     },
     computed: {
@@ -101,6 +121,23 @@
         return isDynamic && question.canRemoveRow;
       }
     },
-    helpers: {}
+    methods: {
+      getCellsByColumn(columnIndex) {
+        var res = [];
+        var rows = this.get().rows;
+        for (var i = 0; i < rows.length; i++) {
+          res.push(rows[i].cells[columnIndex]);
+        }
+        return res;
+      },
+      removeRowClick(row) {
+        var question = this.get().question;
+        var rows = question.visibleRows;
+        var index = rows.indexOf(row);
+        if (index > -1) {
+          question.removeRowUI(index);
+        }
+      }
+    }
   };
 </script>
