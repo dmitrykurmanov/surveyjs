@@ -56,6 +56,7 @@
   import comment from "./comment.svelte";
   import matrix from "./matrix.svelte";
   import matrixdropdown from "./matrixdropdown.svelte";
+  import matrixdynamic from "./matrixdynamic.svelte";
 
   export default {
     data() {
@@ -98,7 +99,8 @@
           checkbox,
           comment,
           matrix,
-          matrixdropdown
+          matrixdropdown,
+          matrixdynamic
         };
         return components[element.getTemplate()];
       }
