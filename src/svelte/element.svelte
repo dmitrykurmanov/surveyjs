@@ -57,6 +57,7 @@
   import matrix from "./matrix.svelte";
   import matrixdropdown from "./matrixdropdown.svelte";
   import matrixdynamic from "./matrixdynamic.svelte";
+  import boolean from "./boolean.svelte";
 
   export default {
     data() {
@@ -100,7 +101,8 @@
           comment,
           matrix,
           matrixdropdown,
-          matrixdynamic
+          matrixdynamic,
+          boolean
         };
         return components[element.getTemplate()];
       }

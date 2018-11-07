@@ -12,8 +12,7 @@
   import radiogroup from "./radiogroup.svelte";
   import checkbox from "./checkbox.svelte";
   import comment from "./comment.svelte";
-  import matrix from "./matrix.svelte";
-  import matrixdropdown from "./matrixdropdown.svelte";
+  import boolean from "./boolean.svelte";
 
   export default {
     data() {
@@ -33,8 +32,7 @@
           radiogroup,
           checkbox,
           comment,
-          matrix,
-          matrixdropdown
+          boolean
         };
         return components[element.getType()];
       }
