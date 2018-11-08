@@ -1,6 +1,7 @@
 <div class={question.cssClasses.root}>
     <label class={getClass(question)}>
-        <input ref:checkbox type="checkbox" name={question.name} id="question.inputId" 
+        <input bind:indeterminate=question.isIndeterminate type="checkbox" 
+            name={question.name} id="question.inputId" 
             value="question.checkedValue" on:change="setValue(this.value)"
             disabled={question.isReadOnly} aria-label={question.locTitle.renderedHtml}/>
         <span class={question.cssClasses.materialDecorator}><span class="check"></span></span>
@@ -17,9 +18,6 @@
         question: null,
         css: null
       };
-    },
-    onupdate() {
-      this.refs.checkbox.indeterminate = this.get().question.isIndeterminate;
     },
     components: {
       SurveyString
