@@ -17,6 +17,7 @@
   import rating from "./rating.svelte";
   import text from "./text.svelte";
   import html from "./html.svelte";
+  import empty from "./empty.svelte";
 
   export default {
     data() {
@@ -40,7 +41,8 @@
           dropdown,
           rating,
           text,
-          html
+          html,
+          empty
         };
         return components[element.getType()];
       }
