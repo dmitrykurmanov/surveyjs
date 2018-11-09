@@ -16,6 +16,7 @@
   import dropdown from "./dropdown.svelte";
   import rating from "./rating.svelte";
   import text from "./text.svelte";
+  import html from "./html.svelte";
 
   export default {
     data() {
@@ -38,7 +39,8 @@
           boolean,
           dropdown,
           rating,
-          text
+          text,
+          html
         };
         return components[element.getType()];
       }
