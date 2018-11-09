@@ -7,7 +7,7 @@
 </div>
 
 <script>
-  import { getMaxLength } from "./utils";
+  import { getMaxLength, getValue } from "./utils";
 
   export default {
     data() {
@@ -18,9 +18,7 @@
     },
     helpers: {
       getMaxLength,
-      getValue(oldValue) {
-        return oldValue || "";
-      }
+      getValue
     },
     methods: {
       setValue(newValue) {
