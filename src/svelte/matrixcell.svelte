@@ -13,6 +13,7 @@
   import checkbox from "./checkbox.svelte";
   import comment from "./comment.svelte";
   import boolean from "./boolean.svelte";
+  import dropdown from "./dropdown.svelte";
 
   export default {
     data() {
@@ -32,7 +33,8 @@
           radiogroup,
           checkbox,
           comment,
-          boolean
+          boolean,
+          dropdown
         };
         return components[element.getType()];
       }
