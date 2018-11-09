@@ -14,6 +14,7 @@
   import comment from "./comment.svelte";
   import boolean from "./boolean.svelte";
   import dropdown from "./dropdown.svelte";
+  import rating from "./rating.svelte";
 
   export default {
     data() {
@@ -34,7 +35,8 @@
           checkbox,
           comment,
           boolean,
-          dropdown
+          dropdown,
+          rating
         };
         return components[element.getType()];
       }

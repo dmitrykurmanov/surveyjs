@@ -59,6 +59,7 @@
   import matrixdynamic from "./matrixdynamic.svelte";
   import boolean from "./boolean.svelte";
   import dropdown from "./dropdown.svelte";
+  import rating from "./rating.svelte";
 
   export default {
     data() {
@@ -104,7 +105,8 @@
           matrixdropdown,
           matrixdynamic,
           boolean,
-          dropdown
+          dropdown,
+          rating
         };
         return components[element.getTemplate()];
       }
