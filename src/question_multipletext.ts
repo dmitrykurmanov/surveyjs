@@ -22,7 +22,7 @@ export interface IMultipleTextData extends ILocalizableOwner, IPanel {
   getTextProcessor(): ITextProcessor;
   getAllValues(): any;
   getMultipleTextValue(name: string): any;
-  setMultipleTextValue(name: string, value: any);
+  setMultipleTextValue(name: string, value: any): any;
   getIsRequiredText(): string;
 }
 
@@ -65,6 +65,10 @@ export class MultipleTextItemModel extends Base
   }
   protected createEditor(name: string): QuestionTextModel {
     return new QuestionTextModel(name);
+  }
+  public locStrsChanged() {
+    super.locStrsChanged();
+    this.editor.locStrsChanged();
   }
   setData(data: IMultipleTextData) {
     this.data = data;
@@ -218,7 +222,7 @@ export class QuestionMultipleTextModel extends Question
   constructor(public name: string) {
     super(name);
     var self = this;
-    this.items = this.createNewArray("items", function(item) {
+    this.items = this.createNewArray("items", function(item: any) {
       item.setData(self);
     });
     this.registerFunctionOnPropertyValueChanged("items", function() {
@@ -245,10 +249,6 @@ export class QuestionMultipleTextModel extends Question
     this.callEditorFunction("onSurveyLoad");
     this.fireCallback(this.colCountChangedCallback);
   }
-  onReadOnlyChanged() {
-    super.onReadOnlyChanged();
-    this.callEditorFunction("onReadOnlyChanged");
-  }
   onSurveyValueChanged(newValue: any) {
     super.onSurveyValueChanged(newValue);
     for (var i = 0; i < this.items.length; i++) {
@@ -259,8 +259,8 @@ export class QuestionMultipleTextModel extends Question
   private callEditorFunction(funcName: string) {
     for (var i = 0; i < this.items.length; i++) {
       var item = this.items[i];
-      if (item.editor && item.editor[funcName]) {
-        item.editor[funcName]();
+      if (item.editor && (<any>item).editor[funcName]) {
+        (<any>item).editor[funcName]();
       }
     }
   }
@@ -425,6 +425,7 @@ export class QuestionMultipleTextModel extends Question
   getQuestionTitleLocation(): string {
     return "left";
   }
+  elementWidthChanged(el: IElement) {}
 }
 
 JsonObject.metaData.addClass(

@@ -26,7 +26,7 @@ export class SurveyQuestion extends SurveyElementBase {
     this.setQuestion(nextProps.question);
     this.setState(this.getState());
   }
-  private setQuestion(question) {
+  private setQuestion(question: any) {
     this.question = question;
     this.makeBaseElementReact(this.question);
   }
@@ -45,24 +45,10 @@ export class SurveyQuestion extends SurveyElementBase {
     if (this.question) {
       var self = this;
       this.question["react"] = self;
-      this.question.registerFunctionOnPropertiesValueChanged(
-        ["renderWidth", "indent", "rightIndent"],
-        function() {
-          self.setState({ renderWidth: self.state.renderWidth + 1 });
-        },
-        "react"
-      );
       this.question.registerFunctionOnPropertyValueChanged(
         "visibleIndex",
         function() {
           self.setState({ visibleIndexValue: self.question.visibleIndex });
-        },
-        "react"
-      );
-      this.question.registerFunctionOnPropertyValueChanged(
-        "isReadOnly",
-        function() {
-          self.setState({ isReadOnly: self.question.isReadOnly });
         },
         "react"
       );
@@ -73,7 +59,7 @@ export class SurveyQuestion extends SurveyElementBase {
     if (this.question) {
       this.question["react"] = null;
       this.question.unRegisterFunctionOnPropertiesValueChanged(
-        ["visibleIndex", "renderWidth", "indent", "rightIndent, isReadOnly"],
+        ["visibleIndex"],
         "react"
       );
       var el: any = this.refs["root"];
@@ -82,7 +68,7 @@ export class SurveyQuestion extends SurveyElementBase {
       }
     }
   }
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(prevProps: any, prevState: any) {
     this.doAfterRender();
   }
   private doAfterRender() {
@@ -130,19 +116,13 @@ export class SurveyQuestion extends SurveyElementBase {
       this.creator.questionErrorLocation() === "top" ? errors : null;
     var errorsBottom =
       this.creator.questionErrorLocation() === "bottom" ? errors : null;
-    var paddingLeft =
-      this.question.indent > 0
-        ? this.question.indent * cssClasses.indent + "px"
-        : null;
-    var paddingRight =
-      this.question.rightIndent > 0
-        ? this.question.rightIndent * cssClasses.indent + "px"
-        : null;
-    let rootStyle = {};
+    let rootStyle: { [index: string]: any } = {};
     if (this.question.renderWidth)
       rootStyle["width"] = this.question.renderWidth;
-    if (paddingLeft) rootStyle["paddingLeft"] = paddingLeft;
-    if (paddingRight) rootStyle["paddingRight"] = paddingRight;
+    if (!!this.question.paddingLeft)
+      rootStyle["paddingLeft"] = this.question.paddingLeft;
+    if (!!this.question.paddingRight)
+      rootStyle["paddingRight"] = this.question.paddingRight;
 
     return (
       <div
@@ -183,7 +163,7 @@ export class SurveyQuestion extends SurveyElementBase {
     return <h5 className={cssClasses.title}>{titleText}</h5>;
   }
   protected renderDescription(cssClasses: any): JSX.Element {
-    if (!this.question.hasDescription) return null;
+    if (this.question.locDescription.isEmpty) return null;
     var descriptionText = SurveyElementBase.renderLocString(
       this.question.locDescription
     );
@@ -230,10 +210,10 @@ export class SurveyElementErrors extends ReactSurveyElement {
     this.setState(this.getState());
     this.creator = nextProps.creator;
   }
-  private setElement(element) {
+  private setElement(element: any) {
     this.element = element instanceof SurveyElement ? element : null;
   }
-  private getState(prevState = null) {
+  private getState(prevState: any = null) {
     return !prevState ? { error: 0 } : { error: prevState.error + 1 };
   }
   render(): JSX.Element {
@@ -254,6 +234,7 @@ export class SurveyElementErrors extends ReactSurveyElement {
 }
 
 export class SurveyQuestionAndErrorsCell extends ReactSurveyElement {
+  [index: string]: any;
   private questionValue: Question;
   protected creator: ISurveyCreator;
   constructor(props: any) {
@@ -288,13 +269,6 @@ export class SurveyQuestionAndErrorsCell extends ReactSurveyElement {
     if (this.question) {
       var self = this;
       this.question.registerFunctionOnPropertyValueChanged(
-        "isReadOnly",
-        function() {
-          self.setState(self.getState());
-        },
-        "react"
-      );
-      this.question.registerFunctionOnPropertyValueChanged(
         "visible",
         function() {
           self.setState(self.getState());
@@ -306,7 +280,7 @@ export class SurveyQuestionAndErrorsCell extends ReactSurveyElement {
   componentWillUnmount() {
     if (this.question) {
       this.question.unRegisterFunctionOnPropertiesValueChanged(
-        ["visible", "isReadOnly"],
+        ["visible"],
         "react"
       );
       var el: any = this.refs["cell"];
@@ -315,7 +289,7 @@ export class SurveyQuestionAndErrorsCell extends ReactSurveyElement {
       }
     }
   }
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(prevProps: any, prevState: any) {
     this.doAfterRender();
   }
   protected doAfterRender() {}

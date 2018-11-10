@@ -1,4 +1,4 @@
-export var surveyCss = {
+export var surveyCss: any = {
   currentType: "",
   getCss: function() {
     var loc = this.currentType ? this[this.currentType] : defaultStandardCss;
@@ -71,7 +71,8 @@ export var defaultStandardCss = {
     root: "sv_q_matrix",
     label: "sv_q_m_label",
     cellText: "sv_q_m_cell_text",
-    cellTextSelected: "sv_q_m_cell_selected"
+    cellTextSelected: "sv_q_m_cell_selected",
+    cellLabel: "sv_q_m_cell_label"
   },
   matrixdropdown: { root: "sv_q_matrix_dropdown" },
   matrixdynamic: {

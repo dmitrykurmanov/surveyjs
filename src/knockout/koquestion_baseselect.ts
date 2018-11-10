@@ -9,6 +9,7 @@ import {
 export class QuestionSelectBaseImplementor extends QuestionImplementor {
   koOtherVisible: any;
   koVisibleChoices: any;
+  protected onCreated() {}
   constructor(question: Question) {
     super(question);
     var self = this;
@@ -25,8 +26,9 @@ export class QuestionSelectBaseImplementor extends QuestionImplementor {
         (<QuestionCheckboxBase>self.question).visibleChoices
       );
     };
-    this.question["koOtherVisible"] = this.koOtherVisible;
-    this.question["koVisibleChoices"] = this.koVisibleChoices;
+    (<any>this.question)["koOtherVisible"] = this.koOtherVisible;
+    (<any>this.question)["koVisibleChoices"] = this.koVisibleChoices;
+    this.onCreated();
   }
   protected get isOtherSelected(): boolean {
     return (<QuestionSelectBase>this.question).isOtherSelected;
@@ -35,9 +37,9 @@ export class QuestionSelectBaseImplementor extends QuestionImplementor {
 export class QuestionCheckboxBaseImplementor extends QuestionSelectBaseImplementor {
   constructor(question: Question) {
     super(question);
-    this.question["koAfterRender"] = this.koAfterRender;
+    (<any>this.question)["koAfterRender"] = this.koAfterRender;
   }
-  private koAfterRender(el, con) {
+  private koAfterRender(el: any, con: any) {
     var tEl = el[0];
     if (tEl.nodeName == "#text") tEl.data = "";
     tEl = el[el.length - 1];

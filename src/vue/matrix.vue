@@ -15,11 +15,12 @@
                     </td>
                     <td v-if="!question.hasCellText" v-for="(column, columnIndex) in question.visibleColumns" :headers="column.locText.renderedHtml">
                         <label :class="getItemClass(row, column)">
-                            <input type="radio" :class="question.cssClasses.itemValue" :name="row.fullName" v-model="row.value" :value="column.value" :disabled="question.isReadOnly" :id="(columnIndex === 0) && (rowIndex === 0) ? question.inputId : ''" v-bind:aria-label="question.locTitle.renderedHtml"/>
+                            <input type="radio" :class="question.cssClasses.itemValue" :name="row.fullName" v-model="row.value" :value="column.value" :disabled="question.isReadOnly" :id="question.inputId + '_' + row.name + '_' + columnIndex" v-bind:aria-label="question.locTitle.renderedHtml"/>
                             <span class="circle"></span>
                             <span class="check"></span>
                             <span :style="{ 'display': 'none' }">{{question.locTitle.renderedHtml}}</span>
                         </label>
+                        <label :class="question.cssClasses.cellLabel" :for="question.inputId + '_' + row.name + '_' + columnIndex"></label>
                     </td>
                 </tr>
             </tbody>
@@ -36,7 +37,7 @@ import { QuestionMatrixModel } from "../question_matrix";
 
 @Component
 export class Matrix extends QuestionVue<QuestionMatrixModel> {
-  getItemClass(row, column) {
+  getItemClass(row:any, column:any) {
     var isChecked = row.value == column.value;
     var cellSelectedClass = this.question.hasCellText
       ? this.question.cssClasses.cellTextSelected
@@ -47,7 +48,7 @@ export class Matrix extends QuestionVue<QuestionMatrixModel> {
     let itemClass = cellClass + (isChecked ? " " + cellSelectedClass : "");
     return itemClass;
   }
-  cellClick(row, column) {
+  cellClick(row:any, column:any) {
     if (this.question.isReadOnly) return;
     row.value = column.value;
   }

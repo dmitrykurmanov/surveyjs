@@ -3,9 +3,9 @@ import { englishStrings } from "./localization/english";
 export var surveyLocalization = {
   currentLocaleValue: "",
   defaultLocaleValue: "en",
-  locales: {},
-  localeNames: {},
-  supportedLocales: [],
+  locales: <{[index: string]: any}>{},
+  localeNames: <{[index: string]: any}>{},
+  supportedLocales: <Array<any>>[],
   get currentLocale() {
     return this.currentLocaleValue === this.defaultLocaleValue
       ? ""
@@ -45,5 +45,5 @@ export var surveyLocalization = {
 };
 
 export var surveyStrings = englishStrings;
-surveyLocalization.locales["en"] = englishStrings;
-surveyLocalization.localeNames["en"] = "english";
+(<any>surveyLocalization).locales["en"] = englishStrings;
+(<any>surveyLocalization).localeNames["en"] = "english";

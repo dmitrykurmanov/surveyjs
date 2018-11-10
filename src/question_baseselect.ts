@@ -110,7 +110,12 @@ export class QuestionSelectBase extends Question {
     this.comment = this.defaultValue;
   }
   protected filterItems(): boolean {
-    if (this.isLoadingFromJson || !this.data || this.isDesignMode) return false;
+    if (
+      this.isLoadingFromJson ||
+      !this.data ||
+      this.areInvisibleElementsShowing
+    )
+      return false;
     return this.runItemsCondition(
       this.getDataFilteredValues(),
       this.getDataFilteredProperties()
@@ -474,6 +479,14 @@ export class QuestionSelectBase extends Question {
     return Helpers.randomizeArray<ItemValue>(array);
   }
   public clearIncorrectValues() {
+    if (
+      !!this.survey &&
+      this.survey.questionCountByValueName(this.getValueName()) > 1
+    )
+      return;
+    this.clearIncorrectValuesCore();
+  }
+  protected clearIncorrectValuesCore() {
     var val = this.value;
     if (this.hasUnknownValue(val, true)) {
       this.clearValue();
@@ -482,7 +495,7 @@ export class QuestionSelectBase extends Question {
   clearUnusedValues() {
     super.clearUnusedValues();
     if (!this.isOtherSelected && !this.hasComment) {
-      this.comment = null;
+      this.comment = "";
     }
   }
 }
@@ -512,13 +525,7 @@ JsonObject.metaData.addClass(
     "hasComment:boolean",
     "hasOther:boolean",
     {
-      name: "choices:itemvalues",
-      onGetValue: function(obj: any) {
-        return ItemValue.getData(obj.choices);
-      },
-      onSetValue: function(obj: any, value: any) {
-        obj.choices = value;
-      }
+      name: "choices:itemvalues"
     },
     {
       name: "choicesOrder",

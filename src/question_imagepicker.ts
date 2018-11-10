@@ -9,6 +9,7 @@ import { ItemValue } from "./itemvalue";
 export class QuestionImagePickerModel extends QuestionCheckboxBase {
   constructor(public name: string) {
     super(name);
+    this.colCount = 0;
   }
   public getType(): string {
     return "imagepicker";
@@ -124,10 +125,10 @@ JsonObject.metaData.addProperty("imagepicker", {
 });
 JsonObject.metaData.addProperty("imagepicker", {
   name: "choices:imageitemvalue",
-  onGetValue: function(obj) {
+  onGetValue: function(obj:any) {
     return ItemValue.getData(obj.choices);
   },
-  onSetValue: function(obj, value) {
+  onSetValue: function(obj:any, value:any) {
     obj.choices = value;
   }
 });

@@ -11,6 +11,9 @@ export class StylesManager {
     //   "max-width: 80%; margin: auto; position: relative; color: #6d7072; padding: 0 1em;",
     // ".sv_bootstrap_css .panel-body":
     //   "background-color: white; padding: 1em 1em 5em 1em; border-top: 2px solid lightgray;",
+
+    ".sv_main span": "word-break: keep-all;",
+
     ".sv_bootstrap_css .sv_qstn": "padding: 0.5em 1em 1.5em 1em;",
     ".sv_bootstrap_css .sv_qcbc input[type=checkbox], .sv_bootstrap_css .sv_qcbc input[type=radio]":
       "vertical-align: middle; margin-top: -1px",
@@ -91,7 +94,10 @@ export class StylesManager {
     ".sv_qstn .sv_q_imgsel label > div":
       "overflow: hidden; white-space: nowrap; text-overflow: ellipsis; padding: 4px; border: 1px solid lightgray; border-radius: 4px;",
     ".sv_qstn .sv_q_imgsel label > div > img, .sv_qstn .sv_q_imgsel label > div > embed":
-      "display: block;"
+      "display: block;",
+
+    ".sv_qstn table tr td .sv_q_m_cell_label":
+      "position: absolute; left: 0; right: 0; top: 0; bottom: 0;"
   };
 
   public static Media: { [key: string]: { media: string; style: string } } = {
@@ -388,7 +394,7 @@ export class StylesManager {
     for (let i = 0; i < document.styleSheets.length; i++) {
       if (
         !!document.styleSheets[i].ownerNode &&
-        document.styleSheets[i].ownerNode["id"] === styleSheetId
+        (<any>document).styleSheets[i].ownerNode["id"] === styleSheetId
       ) {
         return <CSSStyleSheet>document.styleSheets[i];
       }
@@ -411,9 +417,9 @@ export class StylesManager {
     themeName: string = "default",
     themeSelector: string = ".sv_main"
   ) {
-    let ThemeCss;
+    let ThemeCss:any;
     if (["bootstrap", "bootstrapmaterial"].indexOf(themeName) !== -1) {
-      ThemeCss = StylesManager[themeName + "ThemeCss"];
+      ThemeCss = (<any>StylesManager)[themeName + "ThemeCss"];
       surveyCss.currentType = themeName;
     } else {
       ThemeCss = StylesManager.ThemeCss;

@@ -13,7 +13,8 @@ import {
   IConditionRunner,
   IPage,
   SurveyError,
-  Event
+  Event,
+  ISurveyElement
 } from "./base";
 import { ISurveyTriggerOwner, SurveyTrigger } from "./trigger";
 import { PageModel } from "./page";
@@ -39,6 +40,7 @@ export class SurveyModel extends Base
     ISurveyImpl,
     ISurveyTriggerOwner,
     ILocalizableOwner {
+  [index: string]: any;
   private static stylesManager = new StylesManager();
   public static platform: string = "unknown";
   public get platformName(): string {
@@ -57,7 +59,13 @@ export class SurveyModel extends Base
 
   private pagesValue: Array<PageModel>;
   private triggersValue: Array<SurveyTrigger>;
-  private currentPageValue: PageModel = null;
+  private get currentPageValue(): PageModel {
+    return this.getPropertyValue("currentPageValue", null);
+  }
+  private set currentPageValue(val: PageModel) {
+    this.setPropertyValue("currentPageValue", val);
+  }
+
   private valuesHash: HashTable<any> = {};
   private variablesHash: HashTable<any> = {};
 
@@ -647,6 +655,22 @@ export class SurveyModel extends Base
     any
   > = new Event<(sender: SurveyModel, options: any) => any, any>();
   /**
+   * Use this event to control drag&drop operations during design mode.
+   * <br/> sender the survey object that fires the event.
+   * <br/> options.allow set it to false to disable dragging.
+   * <br/> options.target a target element that is dragging.
+   * <br/> options.source a source element. It can be null, if it is a new element, dragging from toolbox.
+   * <br/> options.parent a page or panel where target element is dragging.
+   * <br/> options.insertBefore an element before the target element is dragging. It can be null if parent container (page or panel) is empty or dragging an element under the last element of the container.
+   * <br/> options.insertAfter an element after the target element is dragging. It can be null if parent container (page or panel) is empty or dragging element to the top of the parent container.
+   * @see setDesignMode
+   * @see isDesignMode
+   */
+  public onDragDropAllow: Event<
+    (sender: SurveyModel, options: any) => any,
+    any
+  > = new Event<(sender: SurveyModel, options: any) => any, any>();
+  /**
    * The list of errors on loading survey json. If the list is empty after loading a json then the json is correct and there is no errors in it.
    * @see JsonError
    */
@@ -671,10 +695,10 @@ export class SurveyModel extends Base
     ) {
       self.getProcessedTextValue(textValue);
     };
-    this.pagesValue = this.createNewArray("pages", function(value) {
+    this.pagesValue = this.createNewArray("pages", function(value: any) {
       self.doOnPageAdded(value);
     });
-    this.triggersValue = this.createNewArray("triggers", function(value) {
+    this.triggersValue = this.createNewArray("triggers", function(value: any) {
       value.setOwner(self);
     });
 
@@ -965,7 +989,9 @@ export class SurveyModel extends Base
     this.localeValue = surveyLocalization.currentLocale;
     this.setPropertyValue("locale", this.localeValue);
     this.locStrsChanged();
+    this.onLocaleChanged();
   }
+  protected onLocaleChanged() {}
   //ILocalizableOwner
   getLocale() {
     return this.locale;
@@ -1213,9 +1239,6 @@ export class SurveyModel extends Base
     if (value == this.mode) return;
     if (value != "edit" && value != "display") return;
     this.setPropertyValue("mode", value);
-    for (var i = 0; i < this.pages.length; i++) {
-      this.pages[i].onReadOnlyChanged();
-    }
   }
   /**
    * An object that stores the survey results/data. You may set it directly as { 'question name': questionValue, ... }
@@ -1223,7 +1246,7 @@ export class SurveyModel extends Base
    * @see getValue
    */
   public get data(): any {
-    var result = {};
+    var result: { [index: string]: any } = {};
     for (var key in this.valuesHash) {
       result[key] = this.valuesHash[key];
     }
@@ -1234,7 +1257,7 @@ export class SurveyModel extends Base
   }
   private conditionVersion = 0;
   getFilteredValues(): any {
-    var values = {};
+    var values: { [index: string]: any } = {};
     for (var key in this.variablesHash) values[key] = this.variablesHash[key];
     for (var key in this.valuesHash) values[key] = this.valuesHash[key];
     values["conditionVersion"] = ++this.conditionVersion;
@@ -1267,7 +1290,7 @@ export class SurveyModel extends Base
    * @see data
    */
   public get comments(): any {
-    var result = {};
+    var result: { [index: string]: any } = {};
     for (var key in this.valuesHash) {
       if (key.indexOf(this.commentPrefix) > 0) {
         result[key] = this.valuesHash[key];
@@ -1562,6 +1585,29 @@ export class SurveyModel extends Base
     this.setPropertyValue("isDesignMode", value);
     this.onIsSinglePageChanged();
   }
+  public get showInvisibleElements(): boolean {
+    return this.getPropertyValue("showInvisibleElements", false);
+  }
+  public set showInvisibleElements(val: boolean) {
+    var visPages = this.visiblePages;
+    this.setPropertyValue("showInvisibleElements", val);
+    this.updateAllElementsVisibility(visPages);
+  }
+  private updateAllElementsVisibility(visPages: Array<PageModel>) {
+    for (var i = 0; i < this.pages.length; i++) {
+      var page = this.pages[i];
+      page.updateElementVisibility();
+      if (visPages.indexOf(page) > -1 != page.isVisible) {
+        this.onPageVisibleChanged.fire(this, {
+          page: page,
+          visible: page.isVisible
+        });
+      }
+    }
+  }
+  public get areInvisibleElementsShowing(): boolean {
+    return this.isDesignMode || this.showInvisibleElements;
+  }
   /**
    * Returns true, if a user has already completed the survey on this browser and there is a cookie about it. Survey goes to 'completed' state if the function returns true.
    * @see cookieName
@@ -1666,7 +1712,7 @@ export class SurveyModel extends Base
     this.isStartedState = this.firstPageIsStarted;
     this.pageVisibilityChanged(this.pages[0], !this.firstPageIsStarted);
   }
-  origionalPages = null;
+  origionalPages: any = null;
   protected onIsSinglePageChanged() {
     if (!this.isSinglePage || this.isDesignMode) {
       if (this.origionalPages) {
@@ -1695,6 +1741,7 @@ export class SurveyModel extends Base
       var json = new JsonObject().toJsonObject(page);
       new JsonObject().toObject(json, panel);
     }
+    single.endLoadingFromJson();
     return single;
   }
   /**
@@ -1781,7 +1828,7 @@ export class SurveyModel extends Base
     if (!this.onServerValidateQuestions) return false;
     var self = this;
     var options = {
-      data: {},
+      data: <{ [index: string]: any }>{},
       errors: {},
       survey: this,
       complete: function() {
@@ -1870,7 +1917,7 @@ export class SurveyModel extends Base
     var index = vPages.indexOf(this.currentPage) + 1;
     return this.getLocString("progressText")["format"](index, vPages.length);
   }
-  protected afterRenderSurvey(htmlElement) {
+  protected afterRenderSurvey(htmlElement: any) {
     this.onAfterRenderSurvey.fire(this, {
       survey: this,
       htmlElement: htmlElement
@@ -1888,20 +1935,20 @@ export class SurveyModel extends Base
       cssClasses: cssClasses
     });
   }
-  afterRenderPage(htmlElement) {
+  afterRenderPage(htmlElement: any) {
     if (this.onAfterRenderPage.isEmpty) return;
     this.onAfterRenderPage.fire(this, {
       page: this.currentPage,
       htmlElement: htmlElement
     });
   }
-  afterRenderQuestion(question: IQuestion, htmlElement) {
+  afterRenderQuestion(question: IQuestion, htmlElement: any) {
     this.onAfterRenderQuestion.fire(this, {
       question: question,
       htmlElement: htmlElement
     });
   }
-  afterRenderPanel(panel: IElement, htmlElement) {
+  afterRenderPanel(panel: IElement, htmlElement: any) {
     this.onAfterRenderPanel.fire(this, {
       panel: panel,
       htmlElement: htmlElement
@@ -1949,6 +1996,11 @@ export class SurveyModel extends Base
   dynamicPanelItemValueChanged(question: IQuestion, options: any) {
     options.question = question;
     this.onDynamicPanelItemValueChanged.fire(this, options);
+  }
+  dragAndDropAllow(options: any): boolean {
+    options.allow = true;
+    this.onDragDropAllow.fire(this, options);
+    return options.allow;
   }
 
   /**
@@ -2041,7 +2093,7 @@ export class SurveyModel extends Base
     files: File[],
     uploadingCallback: (status: string, data: any) => any
   ) {
-    var responses = [];
+    var responses: Array<any> = [];
     files.forEach(file => {
       if (uploadingCallback) uploadingCallback("uploading", file);
       this.createSurveyService().sendFile(
@@ -2145,7 +2197,7 @@ export class SurveyModel extends Base
     names: string[],
     caseInsensitive: boolean = false
   ): IQuestion[] {
-    var result = [];
+    var result: IQuestion[] = [];
     if (!names) return result;
     for (var i: number = 0; i < names.length; i++) {
       if (!names[i]) continue;
@@ -2187,7 +2239,7 @@ export class SurveyModel extends Base
    * @param names a list of pages names
    */
   public getPagesByNames(names: string[]): PageModel[] {
-    var result = [];
+    var result: PageModel[] = [];
     if (!names) return result;
     for (var i: number = 0; i < names.length; i++) {
       if (!names[i]) continue;
@@ -2279,7 +2331,7 @@ export class SurveyModel extends Base
   protected notifyQuestionOnValueChanged(valueName: string, newValue: any) {
     if (this.isLoadingFromJson) return;
     var questions = this.getAllQuestions();
-    var question = null;
+    var question: any = null;
     for (var i: number = 0; i < questions.length; i++) {
       if (questions[i].getValueName() != valueName) continue;
       question = questions[i];
@@ -2322,7 +2374,7 @@ export class SurveyModel extends Base
   }
   private checkOnPageTriggers() {
     var questions = this.getCurrentPageQuestions();
-    var values = {};
+    var values: { [index: string]: any } = {};
     for (var i = 0; i < questions.length; i++) {
       var question = questions[i];
       var name = question.getValueName();
@@ -2331,7 +2383,7 @@ export class SurveyModel extends Base
     this.checkTriggers(values, true);
   }
   private getCurrentPageQuestions(): Array<Question> {
-    var result = [];
+    var result: Array<Question> = [];
     var page = this.currentPage;
     if (!page) return result;
     for (var i = 0; i < page.questions.length; i++) {
@@ -2540,6 +2592,9 @@ export class SurveyModel extends Base
   protected onCreating() {}
   private getProcessedTextValue(textValue: TextPreProcessorValue): any {
     var name = textValue.name.toLocaleLowerCase();
+    if (["no", "require", "title"].indexOf(name) !== -1) {
+      return;
+    }
     if (name === "pageno") {
       textValue.isExists = true;
       var page = this.currentPage;
@@ -2585,7 +2640,7 @@ export class SurveyModel extends Base
       textValue.isExists = true;
       name = question.getValueName() + name.substr(firstName.length);
       name = name.toLocaleLowerCase();
-      var values = {};
+      var values: { [index: string]: any } = {};
       values[firstName] = textValue.returnDisplayValue
         ? question.getDisplayValue(false)
         : question.value;
@@ -2614,6 +2669,14 @@ export class SurveyModel extends Base
         return true;
     }
     return false;
+  }
+  questionCountByValueName(valueName: string): number {
+    var counter = 0;
+    var questions = this.getAllQuestions();
+    for (var i: number = 0; i < questions.length; i++) {
+      if (questions[i].getValueName() == valueName) counter++;
+    }
+    return counter;
   }
   private clearInvisibleQuestionValues() {
     var questions = this.getAllQuestions();
@@ -2678,7 +2741,7 @@ export class SurveyModel extends Base
       newValue = this.getUnbindValue(newValue);
       this.setDataValueCore(this.valuesHash, name, newValue);
     }
-    var triggerKeys = {};
+    var triggerKeys: { [index: string]: any } = {};
     triggerKeys[name] = newValue;
     this.checkTriggers(triggerKeys, false);
     this.runConditions();
@@ -2698,7 +2761,7 @@ export class SurveyModel extends Base
     this.onPageAdded.fire(this, options);
   }
   private generateNewName(elements: Array<any>, baseName: string): string {
-    var keys = {};
+    var keys: { [index: string]: any } = {};
     for (var i = 0; i < elements.length; i++) keys[elements[i]["name"]] = true;
     var index = 1;
     while (keys[baseName + index]) index++;
@@ -2745,8 +2808,10 @@ export class SurveyModel extends Base
    * @see getComment
    */
   public setComment(name: string, newValue: string) {
+    if (!newValue) newValue = "";
+    if (Helpers.isTwoValueEquals(newValue, this.getComment(name))) return;
     var commentName = name + this.commentPrefix;
-    if (newValue === "" || newValue === null) {
+    if (Helpers.isValueEmpty(newValue)) {
       this.deleteDataValueCore(this.valuesHash, commentName);
     } else {
       this.setDataValueCore(this.valuesHash, commentName, newValue);
@@ -2844,7 +2909,7 @@ export class SurveyModel extends Base
       name: question.name,
       question: question,
       value: question.value,
-      error: null
+      error: <any>null
     };
     this.onValidateQuestion.fire(this, options);
     return options.error ? new CustomError(options.error, this) : null;
@@ -2854,7 +2919,7 @@ export class SurveyModel extends Base
     var options = {
       name: panel.name,
       panel: panel,
-      error: null
+      error: <any>null
     };
     this.onValidatePanel.fire(this, options);
     return options.error ? new CustomError(options.error, this) : null;
@@ -2880,7 +2945,7 @@ export class SurveyModel extends Base
     return this.textPreProcessor.process(text, returnDisplayValue);
   }
   getSurveyMarkdownHtml(element: Base, text: string): string {
-    var options = { element: element, text: text, html: null };
+    var options = { element: element, text: text, html: <any>null };
     this.onTextMarkdown.fire(this, options);
     return options.html;
   }
@@ -2890,7 +2955,7 @@ export class SurveyModel extends Base
   public getCorrectedAnswerCount(): number {
     var questions = this.getQuizQuestions();
     var counter = 0;
-    var options = { question: null, result: false };
+    var options = { question: <IQuestion>null, result: false };
     for (var i = 0; i < questions.length; i++) {
       options.question = questions[i];
       options.result = options.question.isAnswerCorrect();
@@ -3015,7 +3080,7 @@ export class SurveyModel extends Base
     if (res) res += " ";
     return res + sec + " " + this.getLocString("timerSec");
   }
-  private timerFunc = null;
+  private timerFunc: any = null;
   /**
    * Call this method to start timer that will calculate how much time end-user spends on the survey or on pages
    * @see stopTimer
@@ -3118,7 +3183,7 @@ export class SurveyModel extends Base
   }
   //ISurveyTriggerOwner
   getObjects(pages: string[], questions: string[]): any[] {
-    var result = [];
+    var result: any[] = [];
     Array.prototype.push.apply(result, this.getPagesByNames(pages));
     Array.prototype.push.apply(result, this.getQuestionsByNames(questions));
     return result;
@@ -3143,7 +3208,7 @@ JsonObject.metaData.addClass("survey", [
     choices: () => {
       return surveyLocalization.getLocales();
     },
-    onGetValue: obj => {
+    onGetValue: (obj: any): any => {
       return obj.locale == surveyLocalization.defaultLocale ? null : obj.locale;
     }
   },
@@ -3161,10 +3226,10 @@ JsonObject.metaData.addClass("survey", [
     alternativeName: "elements",
     baseClassName: "question",
     visible: false,
-    onGetValue: function(obj) {
+    onGetValue: function(obj: any): any {
       return null;
     },
-    onSetValue: function(obj, value, jsonConverter) {
+    onSetValue: function(obj: any, value: any, jsonConverter: any) {
       var page = obj.addNewPage("");
       jsonConverter.toObject({ questions: value }, page);
     }

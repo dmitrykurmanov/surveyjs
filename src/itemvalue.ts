@@ -9,6 +9,7 @@ import { ConditionRunner } from "./conditions";
  * The text property is localizable and support markdown.
  */
 export class ItemValue {
+  [index: string]: any;
   public static Separator = "|";
   public static createArray(locOwner: ILocalizableOwner): Array<ItemValue> {
     var items: Array<ItemValue> = [];
@@ -164,7 +165,11 @@ export class ItemValue {
       return txt ? txt : !this.isValueEmpty ? this.value.toString() : null;
     };
     if (text) this.locText.text = text;
-    this.value = value;
+    if (!!value && typeof value === "object") {
+      this.setData(value);
+    } else {
+      this.value = value;
+    }
   }
   public getType: () => string;
   public get locText(): LocalizableString {
@@ -210,11 +215,11 @@ export class ItemValue {
     var value = this.value;
     if (value && value["pos"]) delete value["pos"];
     var result = { value: value };
-    if (textJson) result["text"] = textJson;
-    if (this.visibleIf) result["visibleIf"] = this.visibleIf;
+    if (textJson) (<any>result)["text"] = textJson;
+    if (this.visibleIf) (<any>result)["visibleIf"] = this.visibleIf;
     if (customAttributes) {
       for (var key in customAttributes) {
-        result[key] = customAttributes[key];
+        (<any>result)[key] = customAttributes[key];
       }
     }
     return result;
@@ -269,7 +274,7 @@ export class ItemValue {
           ["locText", "hasText", "isVisible", "isValueEmpty"].indexOf(key) ===
           -1
         ) {
-          this[key] = src[key];
+          (<any>this)[key] = src[key];
         }
       }
     }
@@ -284,19 +289,21 @@ export class ItemValue {
       )
         continue;
       if (result == null) result = {};
-      result[key] = this[key];
+      (<any>result)[key] = this[key];
     }
     return result;
   }
 }
 
-JsonObject.metaData.addClass("itemvalue", [
-  "!value",
-  {
-    name: "text",
-    onGetValue: function(obj: any) {
-      return obj.locText.pureText;
-    }
-  },
-  { name: "visibleIf:condition", visible: false }
-]);
+JsonObject.metaData.addClass(
+  "itemvalue",
+  [
+    "value",
+    {
+      name: "text",
+      serializationProperty: "locText"
+    },
+    { name: "visibleIf:condition", visible: false }
+  ],
+  (value: any) => new ItemValue(value)
+);
