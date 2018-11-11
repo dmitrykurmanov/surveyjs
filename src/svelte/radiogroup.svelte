@@ -20,7 +20,8 @@
     {/each}
     {#if question.showClearButton}
       <div>
-          <input type="button" class={question.cssClasses.clearButton} on:click="doClear()" value={question.clearButtonCaption}/>
+          <input type="button" class={question.cssClasses.clearButton} on:click="doClear()" 
+            value={question.clearButtonCaption}/>
       </div>
     {/if}
     <legend style="display: none;">{question.locTitle.renderedHtml}</legend>
