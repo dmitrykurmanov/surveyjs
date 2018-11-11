@@ -100,24 +100,26 @@
 		    SurveyPage
 		  },
 		  oncreate() {
-		    this.get().surveyModel.onCurrentPageChanged.add((sender, options) => {
+		    const surveyModel = this.get().surveyModel;
+
+		    surveyModel.onCurrentPageChanged.add((sender, options) => {
 		      this.set({ surveyModel: sender });
 		    });
-		    this.get().surveyModel.onVisibleChanged.add((sender, options) => {
+		    surveyModel.onVisibleChanged.add((sender, options) => {
 		      this.set({ surveyModel: sender });
 		    });
-		    this.get().surveyModel.onValueChanged.add((sender, options) => {
+		    surveyModel.onValueChanged.add((sender, options) => {
 		      this.set({ surveyModel: sender });
 		    });
-		    this.get().surveyModel.onComplete.add((sender, options) => {
+		    surveyModel.onComplete.add((sender, options) => {
 		      this.set({ surveyModel: sender });
 		    });
-		    this.get().surveyModel.onPartialSend.add((sender, options) => {
+		    surveyModel.onPartialSend.add((sender, options) => {
 		      this.set({ surveyModel: sender });
-				});
-				this.get().surveyModel.onPageVisibleChanged.add((sender, options) => {
+		    });
+		    surveyModel.onPageVisibleChanged.add((sender, options) => {
 		      this.set({ surveyModel: sender });
-				});
+		    });
 		  },
 		  computed: {
 		    hasTitle: ({ surveyModel }) => {

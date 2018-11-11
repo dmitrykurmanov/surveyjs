@@ -12,10 +12,18 @@ export const listenArrayChanged = (element: any, handler: any): any => {
   const doIterate = (hash: any, key: any): any => {
     let val = hash[key];
     if (!Array.isArray(val)) return;
-    val["onArrayChanged"] = handler;
+    (<any>val)["onArrayChanged"] = handler;
   };
 
   element.iteratePropertiesHash(doIterate);
+
+  element.setPropertyValueCoreHandler = (hash: any, key: string, val: any) => {
+    if (hash[key] === val) return;
+    hash[key] = val;
+    handler();
+  };
+
+  element.visibleRowsChangedCallback = handler;
 };
 
 export const getMaxLength = (maxLengthValue: any): any => {
