@@ -79,9 +79,12 @@
     },
     onupdate() {
       const element = this.get().element;
-      listenArrayChanged(element, () => {
+      addCoreTwoWayBinding(element, () => {
         this.set({ element, ...element });
       });
+    },
+    ondestroy() {
+      removeCoreTwoWayBinding(this.get().element);
     },
     helpers: {
       getQuestionClass(element, css) {
@@ -117,5 +120,42 @@
         return components[element.getTemplate()];
       }
     }
+  };
+
+  const addCoreTwoWayBinding = (element, handler) => {
+    if (!element) return;
+    if (!element.iteratePropertiesHash) return;
+
+    const doIterate = (hash, key) => {
+      let val = hash[key];
+      if (!Array.isArray(val)) return;
+      val["onArrayChanged"] = handler;
+    };
+
+    element.iteratePropertiesHash(doIterate);
+
+    element.setPropertyValueCoreHandler = (hash, key, val) => {
+      if (hash[key] === val) return;
+      hash[key] = val;
+      handler();
+    };
+
+    element.visibleRowsChangedCallback = handler;
+  };
+
+  const removeCoreTwoWayBinding = element => {
+    if (!element) return;
+    if (!element.iteratePropertiesHash) return;
+
+    const doIterate = (hash, key) => {
+      let val = hash[key];
+      if (!Array.isArray(val)) return;
+      val["onArrayChanged"] = () => {};
+    };
+
+    element.iteratePropertiesHash(doIterate);
+
+    element.setPropertyValueCoreHandler = undefined;
+    element.visibleRowsChangedCallback = null;
   };
 </script>

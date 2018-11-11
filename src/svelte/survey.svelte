@@ -101,25 +101,23 @@
 		  },
 		  oncreate() {
 		    const surveyModel = this.get().surveyModel;
-
-		    surveyModel.onCurrentPageChanged.add((sender, options) => {
-		      this.set({ surveyModel: sender });
-		    });
-		    surveyModel.onVisibleChanged.add((sender, options) => {
-		      this.set({ surveyModel: sender });
-		    });
-		    surveyModel.onValueChanged.add((sender, options) => {
-		      this.set({ surveyModel: sender });
-		    });
-		    surveyModel.onComplete.add((sender, options) => {
-		      this.set({ surveyModel: sender });
-		    });
-		    surveyModel.onPartialSend.add((sender, options) => {
-		      this.set({ surveyModel: sender });
-		    });
-		    surveyModel.onPageVisibleChanged.add((sender, options) => {
-		      this.set({ surveyModel: sender });
-		    });
+		    const handler = this.setSurveyModel.bind(this);
+		    surveyModel.onCurrentPageChanged.add(handler);
+		    surveyModel.onVisibleChanged.add(handler);
+		    surveyModel.onValueChanged.add(handler);
+		    surveyModel.onComplete.add(handler);
+		    surveyModel.onPartialSend.add(handler);
+		    surveyModel.onPageVisibleChanged.add(handler);
+		  },
+		  ondestroy() {
+		    const surveyModel = this.get().surveyModel;
+		    const handler = this.setSurveyModel.bind(this);
+		    surveyModel.onCurrentPageChanged.remove(handler);
+		    surveyModel.onVisibleChanged.remove(handler);
+		    surveyModel.onValueChanged.remove(handler);
+		    surveyModel.onComplete.remove(handler);
+		    surveyModel.onPartialSend.remove(handler);
+		    surveyModel.onPageVisibleChanged.remove(handler);
 		  },
 		  computed: {
 		    hasTitle: ({ surveyModel }) => {
@@ -136,6 +134,9 @@
 		    }
 		  },
 		  methods: {
+		    setSurveyModel(newSurveyModel) {
+		      this.set({ surveyModel: newSurveyModel });
+		    },
 		    doTrySaveAgain() {
 		      this.get().surveyModel.doComplete();
 		    },
