@@ -63,6 +63,7 @@
   import html from "./html.svelte";
   import empty from "./empty.svelte";
   import fileQuestion from "./file.svelte";
+  import expression from "./expression.svelte";
 
   export default {
     data() {
@@ -116,7 +117,8 @@
           text,
           html,
           empty,
-          file:fileQuestion
+          file:fileQuestion,
+          expression
         };
         return components[element.getTemplate()];
       }
