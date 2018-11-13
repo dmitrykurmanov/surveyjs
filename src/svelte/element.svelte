@@ -49,7 +49,6 @@
   import SurveyString from "./string.svelte";
   import SurveyErrors from "./errors.svelte";
   import OtherChoice from "./otherChoice.svelte";
-  import { listenArrayChanged } from "./utils";
 
   import radiogroup from "./radiogroup.svelte";
   import checkbox from "./checkbox.svelte";
@@ -63,6 +62,7 @@
   import text from "./text.svelte";
   import html from "./html.svelte";
   import empty from "./empty.svelte";
+  import fileQuestion from "./file.svelte";
 
   export default {
     data() {
@@ -115,7 +115,8 @@
           rating,
           text,
           html,
-          empty
+          empty,
+          file:fileQuestion
         };
         return components[element.getTemplate()];
       }
