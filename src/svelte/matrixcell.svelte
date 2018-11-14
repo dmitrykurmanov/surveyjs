@@ -20,6 +20,7 @@
   import empty from "./empty.svelte";
   import fileQuestion from "./file.svelte";
   import expression from "./expression.svelte";
+  import panel from "./panel.svelte";
 
   export default {
     data() {
@@ -46,7 +47,8 @@
           html,
           empty,
           file: fileQuestion,
-          expression
+          expression,
+          panel
         };
         return components[element.getType()];
       }
