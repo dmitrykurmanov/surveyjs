@@ -43,6 +43,22 @@
       SurveyPanel,
       PaneldynamicProgress
     },
+    oncreate() {
+      const question = this.get().question;
+      const handler = () => {
+        this.set({ question, ...this.get().question });
+      };
+
+      question.panelCountChangedCallback = handler;
+      question.currentIndexChangedCallback = handler;
+      question.renderModeChangedCallback = handler;
+    },
+    ondestroy() {
+      const question = this.get().question;
+      question.panelCountChangedCallback = null;
+      question.currentIndexChangedCallback = null;
+      question.renderModeChangedCallback = null;
+    },
     computed: {
       renderedPanels: ({ question }) => {
         if (question.isRenderModeList) return question.panels;
