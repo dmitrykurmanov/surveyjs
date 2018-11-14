@@ -32,14 +32,13 @@
     
     {#if isColumnsHorizontal}
         <tbody>
-            {#each rows as row, rowIndex}
+            {#each rows as row, rowIndex (question.inputId + "-" + rowIndex)}
                 <tr>
                     {#if !isDynamic}
                         <td><SurveyString locString={row.locText}/></td>
                     {/if}
-                    {#each row.cells as cell}
-                        <MatrixCell question={question} cell={cell} 
-                            key={rowIndex + '_' + cell.question.id}/>
+                    {#each row.cells as cell (rowIndex + '_' + cell.question.id)}
+                        <MatrixCell question={question} cell={cell} />
                     {/each}
                     {#if canRemoveRow}
                         <td>
