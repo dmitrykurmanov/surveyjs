@@ -65,6 +65,7 @@
   import fileQuestion from "./file.svelte";
   import expression from "./expression.svelte";
   import panel from "./panel.svelte";
+  import paneldynamic from "./paneldynamic.svelte";
 
   export default {
     data() {
@@ -120,7 +121,8 @@
           empty,
           file: fileQuestion,
           expression,
-          panel
+          panel,
+          paneldynamic
         };
         return components[element.getTemplate()];
       }

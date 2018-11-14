@@ -31,7 +31,6 @@
     data() {
       return {
         question: null,
-        isEditMode: null,
         css: null,
         isCollapsed: null
       };
