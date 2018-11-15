@@ -64,15 +64,6 @@
         if (!window["FileReader"] || files.length < 1) return;
         this.refs.input.value = "";
         this.get().question.loadFiles(files);
-        // debugger;
-        // if (!window["FileReader"]) return;
-        // if (!src || !src.files || src.files.length < 1) return;
-        // let files = [];
-        // for (let i = 0; i < src.files.length; i++) {
-        //   files.push(src.files[i]);
-        // }
-        // src.value = "";
-        // this.get().question.loadFiles(files);
       },
       doClean() {
         this.get().question.clear();
