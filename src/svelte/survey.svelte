@@ -24,18 +24,28 @@
 
 		{#if surveyModel.state === 'running'}
 			<div class={css.body}>
-				<!-- <survey-progress v-if="surveyModel.isShowProgressBarOnTop" :survey="survey" :css="css"/> -->
+				{#if surveyModel.isShowProgressBarOnTop}
+					<Progress survey={surveyModel} css={css} />
+				{/if}
+				
 				<!-- <survey-timerpanel v-if="surveyModel.isTimerPanelShowingOnTop" :survey="survey" :css="css"/> -->
+				
 				<SurveyPage id={surveyModel.currentPage.id} survey={surveyModel} page={surveyModel.currentPage} css={css} />
+				
 				<!-- <survey-timerpanel v-if="surveyModel.isTimerPanelShowingOnBottom" :survey="survey" :css="css"/> -->
-				<!-- <survey-progress style="margin-top: 1em" v-if="surveyModel.isShowProgressBarOnBottom" :survey="survey" :css="css"/> -->
+				
+				{#if surveyModel.isShowProgressBarOnBottom}
+					<Progress style="margin-top: 1em" survey={surveyModel} css={css} />	
+				{/if}
 
 				{#if surveyModel.isNavigationButtonsShowing}
 					<div class={css.footer}>
 							<input type="button" class:sjs-hide="surveyModel.isFirstPage || !surveyModel.isShowPrevButton" value={surveyModel.pagePrevText} class={getNavBtnClasses(css, 'prev')} on:click="prevPage()"/>
 							<input type="button" class:sjs-hide="surveyModel.isLastPage" value={surveyModel.pageNextText} class={getNavBtnClasses(css, 'next')} on:click="nextPage()"/>
+							
 							{#if surveyModel.isEditMode}
-							<input type="button" class:sjs-hide="!surveyModel.isLastPage" value={surveyModel.completeText} class={getNavBtnClasses(css, 'complete')} on:click="completeLastPage()"/>
+								<input type="button" class:sjs-hide="!surveyModel.isLastPage" value={surveyModel.completeText} class={getNavBtnClasses(css, 'complete')} on:click="completeLastPage()"/>
+							
 							{/if}
 					</div>
 				{/if}
@@ -87,6 +97,7 @@
 		import { QuestionRadiogroupModel } from "../question_radiogroup";
 		import SurveyString from "./string.svelte";
 		import SurveyPage from "./page.svelte";
+		import Progress from "./progress.svelte";
 
 		export default {
 		  data() {
@@ -97,7 +108,8 @@
 		  },
 		  components: {
 		    SurveyString,
-		    SurveyPage
+		    SurveyPage,
+		    Progress
 		  },
 		  oncreate() {
 		    const surveyModel = this.get().surveyModel;
