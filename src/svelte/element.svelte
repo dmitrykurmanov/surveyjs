@@ -67,6 +67,7 @@
   import panel from "./panel.svelte";
   import paneldynamic from "./paneldynamic.svelte";
   import imagepicker from "./imagepicker.svelte";
+  import multipletext from "./multipletext.svelte";
 
   export default {
     data() {
@@ -124,7 +125,8 @@
           expression,
           panel,
           paneldynamic,
-          imagepicker
+          imagepicker,
+          multipletext
         };
         return components[element.getTemplate()];
       }
