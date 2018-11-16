@@ -22,6 +22,7 @@
   import expression from "./expression.svelte";
   import panel from "./panel.svelte";
   import paneldynamic from "./paneldynamic.svelte";
+  import imagepicker from "./imagepicker.svelte";
 
   export default {
     data() {
@@ -50,7 +51,8 @@
           file: fileQuestion,
           expression,
           panel,
-          paneldynamic
+          paneldynamic,
+          imagepicker
         };
         return components[element.getType()];
       }
