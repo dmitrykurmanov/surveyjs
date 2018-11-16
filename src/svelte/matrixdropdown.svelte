@@ -1,4 +1,4 @@
-<div style={getOverflowX(question)}>
+<div style="overflowX: {getOverflowX(question)};">
     <MatrixTable question={question} />
 </div>
 
@@ -16,8 +16,7 @@
     },
     helpers: {
       getOverflowX(question) {
-        const overflowValue = question.horizontalScroll ? "scroll" : "";
-        return { overflowX: overflowValue };
+        return question.horizontalScroll ? "scroll" : "";
       }
     }
   };

@@ -1,6 +1,6 @@
 
 <div class={css.progress}>
-    <div class="css.progressBar" style={{width: survey.getProgress() + '%'}} 
+    <div class="css.progressBar" style="width: { survey.getProgress() + '%'}"
       role="progressbar" aria-valuemin="0" aria-valuemax="100">
         <span>
           {survey.progressText}

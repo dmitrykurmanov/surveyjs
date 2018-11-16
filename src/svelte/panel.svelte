@@ -10,7 +10,7 @@
             <SurveyString locString={question.locDescription}/>
         </div>
         <SurveyErrors question={question} />
-        <div  class:sjs-hide="isCollapsed" style={{ paddingLeft: question.innerPaddingLeft }} >
+        <div  class:sjs-hide="isCollapsed" style="paddingLeft: {question.innerPaddingLeft };" >
             {#each question.rows as row, index}
                 {#if row.visible}
                 <div key={question.id + '_' + index} class={css.row}>
@@ -67,9 +67,9 @@
     },
     helpers: {
       rootStyle(question) {
-        var result = {};
+        var result = "";
         if (question.renderWidth) {
-          result["width"] = question.renderWidth;
+          result = "width: " + question.renderWidth + ";";
         }
         return result;
       },

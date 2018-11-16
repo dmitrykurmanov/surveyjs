@@ -1,5 +1,5 @@
 
-<div style={{overflowX: question.horizontalScroll? 'scroll': ''}}>
+<div style="overflowX: {question.horizontalScroll ? 'scroll': ''}">
     {#if question.isAddRowOnTop}
         <div class={question.cssClasses.footer}>
             <input type="button" class={question.cssClasses.button + ' ' + question.cssClasses.buttonAdd} 
