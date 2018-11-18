@@ -1,17 +1,21 @@
-<td class={question.cssClasses.itemValue} 
-    headers={cell.question.isVisible ? cell.column.locTitle.renderedHtml : ''}>
-    <SurveyErrors question={cell.question} />
-    <div class:sjs-hide="!cell.question.isVisible">
-      <svelte:component  this={dynamicComponent} question={cell.question} />
-    </div>   
-</td>
+<div ref:widget>
+    {#if !!question.customWidget.htmlTemplate}
+        <div>
+            {@html question.customWidget.htmlTemplate}
+        </div>
+    {/if}
+    {#if question.customWidget.isDefaultRender}
+        <svelte:component this={dynamicComponent} question={question} css={css}/>
+    {/if}
+</div>
 
 <script>
-  import SurveyErrors from "./errors.svelte";
-
   import radiogroup from "./radiogroup.svelte";
   import checkbox from "./checkbox.svelte";
   import comment from "./comment.svelte";
+  import matrix from "./matrix.svelte";
+  import matrixdropdown from "./matrixdropdown.svelte";
+  import matrixdynamic from "./matrixdynamic.svelte";
   import boolean from "./boolean.svelte";
   import dropdown from "./dropdown.svelte";
   import rating from "./rating.svelte";
@@ -24,26 +28,31 @@
   import paneldynamic from "./paneldynamic.svelte";
   import imagepicker from "./imagepicker.svelte";
   import multipletext from "./multipletext.svelte";
-  import customwidget from "./customwidget.svelte";
 
   export default {
     data() {
       return {
         question: null,
-        cell: null
+        css: null
       };
     },
-    components: {
-      SurveyErrors
+    oncreate() {
+      const question = this.get().question;
+      question.customWidget.afterRender(question, this.refs.widget);
+    },
+    ondestroy() {
+      const question = this.get().question;
+      question.customWidget.willUnmount(question, this.refs.widget);
     },
     computed: {
-      dynamicComponent: ({ cell }) => {
-        const element = cell.question;
-        if (element.customWidget) return customwidget;
+      dynamicComponent: ({ question }) => {
         const components = {
           radiogroup,
           checkbox,
           comment,
+          matrix,
+          matrixdropdown,
+          matrixdynamic,
           boolean,
           dropdown,
           rating,
@@ -55,12 +64,10 @@
           panel,
           paneldynamic,
           imagepicker,
-          multipletext,
-          customwidget
+          multipletext
         };
-        return components[element.getType()];
+        return components[question.getTemplate()];
       }
-    },
-    methods: {}
+    }
   };
 </script>

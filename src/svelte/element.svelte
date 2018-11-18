@@ -68,6 +68,7 @@
   import paneldynamic from "./paneldynamic.svelte";
   import imagepicker from "./imagepicker.svelte";
   import multipletext from "./multipletext.svelte";
+  import customwidget from "./customwidget.svelte";
 
   export default {
     data() {
@@ -107,7 +108,7 @@
         return !element.isPanel && survey.questionErrorLocation === "bottom";
       },
       dynamicComponent: ({ element }) => {
-        if (element.customWidget) return "customwidget";
+        if (element.customWidget) return customwidget;
         const components = {
           radiogroup,
           checkbox,
