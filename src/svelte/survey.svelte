@@ -28,11 +28,15 @@
 					<Progress survey={surveyModel} css={css} />
 				{/if}
 				
-				<!-- <survey-timerpanel v-if="surveyModel.isTimerPanelShowingOnTop" :survey="survey" :css="css"/> -->
-				
+				{#if surveyModel.isTimerPanelShowingOnTop}
+					<TimerPanel survey={surveyModel} />
+				{/if}
+
 				<SurveyPage id={surveyModel.currentPage.id} survey={surveyModel} page={surveyModel.currentPage} css={css} />
 				
-				<!-- <survey-timerpanel v-if="surveyModel.isTimerPanelShowingOnBottom" :survey="survey" :css="css"/> -->
+				{#if surveyModel.isTimerPanelShowingOnBottom}
+					<TimerPanel survey={surveyModel} />
+				{/if}				
 				
 				{#if surveyModel.isShowProgressBarOnBottom}
 					<Progress style="margin-top: 1em" survey={surveyModel} css={css} />	
@@ -98,6 +102,7 @@
 		import SurveyString from "./string.svelte";
 		import SurveyPage from "./page.svelte";
 		import Progress from "./progress.svelte";
+		import TimerPanel from "./timerpanel.svelte";
 
 		export default {
 		  data() {
@@ -109,7 +114,8 @@
 		  components: {
 		    SurveyString,
 		    SurveyPage,
-		    Progress
+		    Progress,
+		    TimerPanel
 		  },
 		  oncreate() {
 		    const surveyModel = this.get().surveyModel;
@@ -120,6 +126,8 @@
 		    surveyModel.onComplete.add(handler);
 		    surveyModel.onPartialSend.add(handler);
 		    surveyModel.onPageVisibleChanged.add(handler);
+		    surveyModel.onStarted.add(handler);
+		    surveyModel.onTimer.add(handler);
 		  },
 		  ondestroy() {
 		    const surveyModel = this.get().surveyModel;
@@ -130,6 +138,7 @@
 		    surveyModel.onComplete.remove(handler);
 		    surveyModel.onPartialSend.remove(handler);
 		    surveyModel.onPageVisibleChanged.remove(handler);
+		    surveyModel.onStarted.remove(handler);
 		  },
 		  computed: {
 		    hasTitle: ({ surveyModel }) => {
