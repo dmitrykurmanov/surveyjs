@@ -20,3 +20,5 @@ export {
 export { SurveyModel as Model } from "../survey";
 import Survey from "../svelte/survey.svelte";
 export { Survey };
+import SurveyWindow from "../svelte/window.svelte";
+export { SurveyWindow };

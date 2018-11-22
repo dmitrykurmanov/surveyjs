@@ -139,6 +139,7 @@
 		    surveyModel.onPartialSend.remove(handler);
 		    surveyModel.onPageVisibleChanged.remove(handler);
 		    surveyModel.onStarted.remove(handler);
+		    surveyModel.onTimer.remove(handler);
 		  },
 		  computed: {
 		    hasTitle: ({ surveyModel }) => {
