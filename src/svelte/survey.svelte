@@ -39,7 +39,9 @@
 				{/if}				
 				
 				{#if surveyModel.isShowProgressBarOnBottom}
-					<Progress style="margin-top: 1em" survey={surveyModel} css={css} />	
+					<div style="margin-top: 1em">
+						<Progress survey={surveyModel} css={css} />
+					</div>
 				{/if}
 
 				{#if surveyModel.isNavigationButtonsShowing}
@@ -185,6 +187,6 @@
 
 <style>
   :global(.sjs-hide) {
-    visibility: hidden;
+    display: none;
   }
 </style>

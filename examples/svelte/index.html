@@ -3,6 +3,7 @@
   <head>
     <title>Welcome to Svelte</title>
 
+    <link rel="stylesheet" href="../../packages/survey-svelte/survey.css" />
     <script src="../../packages/survey-svelte/survey.svelte.js"></script>
   </head>
 
@@ -10,6 +11,8 @@
     <div id="surveyElement"></div>
     <div id="surveyResult"></div>
     <script>
+      Survey.StylesManager.applyTheme("default");
+
       var json = {
         title: "Please help us to improve our product",
         pages: [
@@ -140,6 +143,31 @@
         ]
       };
 
+      var json = {
+        questions: [
+          {
+            type: "radiogroup",
+            name: "car",
+            title: "What car are you driving?",
+            isRequired: true,
+            hasOther: true,
+            colCount: 4,
+            choices: [
+              "None",
+              "Ford",
+              "Vauxhall",
+              "Volkswagen",
+              "Nissan",
+              "Audi",
+              "Mercedes-Benz",
+              "BMW",
+              "Peugeot",
+              "Toyota",
+              "Citroen"
+            ]
+          }
+        ]
+      };
       window.survey = new Survey.Model(json);
 
       survey.data = {
@@ -161,18 +189,18 @@
           "result: " + JSON.stringify(result.data);
       });
 
-      // var svelteSurvey = new Survey.Survey({
-      //     target: document.querySelector("#surveyElement"),
-      //     data: {
-      //         surveyModel: survey
-      //     }
-      // })
-      var svelteSurvey = new Survey.SurveyWindow({
+      var svelteSurvey = new Survey.Survey({
         target: document.querySelector("#surveyElement"),
         data: {
-          model: surveyWindow
+          surveyModel: survey
         }
       });
+      // var svelteSurvey = new Survey.SurveyWindow({
+      //   target: document.querySelector("#surveyElement"),
+      //   data: {
+      //     model: surveyWindow
+      //   }
+      // });
     </script>
   </body>
 </html>

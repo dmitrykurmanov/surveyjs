@@ -22,7 +22,9 @@
         {/each}
     </div>
     <div class:sjs-hide="!question.hasOther">
-        <OtherChoice class={question.cssClasses.other} question={question}/>
+        <div class={question.cssClasses.other}>
+            <OtherChoice question={question}/>
+        </div>
     </div>
 </div>
 
