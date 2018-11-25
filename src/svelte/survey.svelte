@@ -185,6 +185,6 @@
 
 <style>
   :global(.sjs-hide) {
-    visibility: hidden;
+    display: none;
   }
 </style>
