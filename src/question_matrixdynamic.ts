@@ -371,7 +371,7 @@ export class QuestionMatrixDynamicModel extends QuestionMatrixDropdownModelBase
   }
   protected getDisplayValueCore(keysAsText: boolean): any {
     var values = this.value;
-    if (!values) return values;
+    if (!values || !Array.isArray(values)) return values;
     var rows = this.visibleRows;
     for (var i = 0; i < rows.length && i < values.length; i++) {
       var val = values[i];
@@ -473,6 +473,7 @@ export class QuestionMatrixDynamicModel extends QuestionMatrixDropdownModelBase
     if (this.generatedVisibleRows) {
       this.generatedVisibleRows = null;
       this.generatedVisibleRows = this.visibleRows;
+      this.fireCallback(this.visibleRowsChangedCallback);
     }
   }
   protected createNewValue(curValue: any): any {
@@ -522,6 +523,7 @@ export class QuestionMatrixDynamicModel extends QuestionMatrixDropdownModelBase
 JsonObject.metaData.addClass(
   "matrixdynamic",
   [
+    { name: "rowsVisibleIf:condition", visible: false },
     { name: "rowCount:number", default: 2 },
     { name: "minRowCount:number", default: 0 },
     {

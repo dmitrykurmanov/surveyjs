@@ -1,11 +1,11 @@
 import { Helpers, HashTable } from "./helpers";
-import { ItemValue } from "./itemvalue";
 
 export interface IObject {
   [key: string]: any;
 }
 
 export class JsonObjectProperty implements IObject {
+  public static getItemValuesDefaultValue: (val: any) => any;
   [key: string]: any;
   private static mergableValues = [
     "typeValue",
@@ -49,11 +49,14 @@ export class JsonObjectProperty implements IObject {
     return this.typeValue ? this.typeValue : "string";
   }
   public set type(value: string) {
+    if (value === "itemvalues") value = "itemvalue[]";
     this.typeValue = value;
-    if (this.typeValue === "itemvalues") {
-      this.className = "itemvalue";
+    if (this.typeValue.indexOf("[]") === this.typeValue.length - 2) {
+      this.isArray = true;
+      this.className = this.typeValue.substr(0, this.typeValue.length - 2);
     }
   }
+  public isArray = false;
   public get isRequired() {
     return this.isRequiredValue;
   }
@@ -65,9 +68,13 @@ export class JsonObjectProperty implements IObject {
   }
   public get defaultValue() {
     var result: any = this.defaultValueValue;
-    if (this.typeValue === "itemvalues") {
-      result = [];
-      ItemValue.setData(result, this.defaultValueValue || []);
+    if (
+      !!JsonObjectProperty.getItemValuesDefaultValue &&
+      JsonObject.metaData.isDescendantOf(this.className, "itemvalue")
+    ) {
+      result = JsonObjectProperty.getItemValuesDefaultValue(
+        this.defaultValueValue || []
+      );
     }
     return result;
   }
@@ -77,7 +84,11 @@ export class JsonObjectProperty implements IObject {
   public isDefaultValue(value: any): boolean {
     if (!Helpers.isValueEmpty(this.defaultValue))
       return this.defaultValue == value;
-    return value === false || value === "" || Helpers.isValueEmpty(value);
+    return (
+      (value === false && this.type == "boolean") ||
+      value === "" ||
+      Helpers.isValueEmpty(value)
+    );
   }
   public getValue(obj: any): any {
     if (this.onGetValue) return this.onGetValue(obj);
@@ -254,7 +265,7 @@ export class CustomPropertiesCollection {
     } else {
       var defaultValue = prop.defaultValue;
       if (
-        prop.type === "itemvalues" &&
+        JsonObject.metaData.isDescendantOf(prop.className, "itemvalue") &&
         typeof obj.createNewArray === "function"
       ) {
         obj.createNewArray(prop.name, function(item: any) {
@@ -263,15 +274,17 @@ export class CustomPropertiesCollection {
         obj.setPropertyValue(prop.name, defaultValue);
         defaultValue = null;
       }
-      var desc = {
-        get: () => {
-          return obj.getPropertyValue(prop.name, defaultValue);
-        },
-        set: function(v: any) {
-          obj.setPropertyValue(prop.name, v);
-        }
-      };
-      Object.defineProperty(obj, prop.name, desc);
+      if (!!obj.getPropertyValue && !!obj.setPropertyValue) {
+        var desc = {
+          get: () => {
+            return obj.getPropertyValue(prop.name, defaultValue);
+          },
+          set: function(v: any) {
+            obj.setPropertyValue(prop.name, v);
+          }
+        };
+        Object.defineProperty(obj, prop.name, desc);
+      }
     }
   }
 }
@@ -283,7 +296,7 @@ export class JsonMetadataClass {
   constructor(
     public name: string,
     properties: Array<any>,
-    public creator: (json?:any) => any = null,
+    public creator: (json?: any) => any = null,
     public parentName: string = null
   ) {
     name = name.toLowerCase();
@@ -515,15 +528,15 @@ export class JsonMetadata {
   ): any {
     name = name.toLowerCase();
     var res = creator(json);
-    res.customTypeName = name;
-    res.customTemplateName = res.getTemplate
+    var customTypeName = name;
+    var customTemplateName = res.getTemplate
       ? res.getTemplate()
       : res.getType();
     res.getType = function() {
-      return res.customTypeName;
+      return customTypeName;
     };
     res.getTemplate = function() {
-      return res.customTemplateName;
+      return customTemplateName;
     };
     CustomPropertiesCollection.createProperties(res);
     return res;
@@ -626,6 +639,25 @@ export class JsonMetadata {
       if (!!newName && newName != name) return this.findClass(newName);
     }
     return res;
+  }
+  public isDescendantOf(className: string, ancestorClassName: string) {
+    if (!className || !ancestorClassName) {
+      return false;
+    }
+    className = className.toLowerCase();
+    ancestorClassName = ancestorClassName.toLowerCase();
+    var class_ = this.findClass(className);
+    if (!class_) {
+      return false;
+    }
+    var parentClass = class_;
+    do {
+      if (parentClass.name === ancestorClassName) {
+        return true;
+      }
+      parentClass = this.classes[parentClass.parentName];
+    } while (!!parentClass);
+    return false;
   }
   public addAlterNativeClassName(name: string, alternativeName: string) {
     this.alternativeNames[alternativeName.toLowerCase()] = name.toLowerCase();
@@ -754,8 +786,13 @@ export class JsonObject {
   public toObject(jsonObj: any, obj: any) {
     if (!jsonObj) return;
     var properties = null;
+    var objType = undefined;
+    var needAddErrors = true;
     if (obj.getType) {
-      properties = JsonObject.metaData.getProperties(obj.getType());
+      objType = obj.getType();
+      properties = JsonObject.metaData.getProperties(objType);
+      needAddErrors =
+        !!objType && !JsonObject.metaData.isDescendantOf(objType, "itemvalue");
     }
     if (!properties) return;
     if (obj.startLoadingFromJson) {
@@ -763,17 +800,19 @@ export class JsonObject {
     }
     properties = this.addDynamicProperties(obj, jsonObj, properties);
     for (var key in jsonObj) {
-      if (key == JsonObject.typePropertyName) continue;
-      if (key == JsonObject.positionPropertyName) {
+      if (key === JsonObject.typePropertyName) continue;
+      if (key === JsonObject.positionPropertyName) {
         obj[key] = jsonObj[key];
         continue;
       }
       var property = this.findProperty(properties, key);
       if (!property) {
-        this.addNewError(
-          new JsonUnknownPropertyError(key.toString(), obj.getType()),
-          jsonObj
-        );
+        if (needAddErrors) {
+          this.addNewError(
+            new JsonUnknownPropertyError(key.toString(), objType),
+            jsonObj
+          );
+        }
         continue;
       }
       this.valueToObj(jsonObj[key], obj, property);
@@ -847,7 +886,7 @@ export class JsonObject {
       this.valueToJson(obj, json, properties[i], storeDefaults);
     }
   }
-  protected valueToJson(
+  public valueToJson(
     obj: any,
     result: any,
     property: JsonObjectProperty,
@@ -992,6 +1031,9 @@ export class JsonObject {
     for (var i = 0; i < value.length; i++) {
       var newValue = this.createNewObj(value[i], property);
       if (newValue.newObj) {
+        if (!!value[i].name) {
+          newValue.newObj.name = value[i].name;
+        }
         obj[key].push(newValue.newObj);
         this.toObject(value[i], newValue.newObj);
       } else {

@@ -31,12 +31,15 @@ export class SurveyPanelBase extends SurveyElementBase {
   }
   public set panelBase(val: PanelModelBase) {
     this.panelValue = val;
+  }
+  componentWillMount() {
     this.makeBaseElementReact(this.panelBase);
   }
   componentDidMount() {
     this.doAfterRender();
   }
   componentWillUnmount() {
+    this.unMakeBaseElementReact(this.panelBase);
     var el: any = this.refs["root"];
     if (!!el) {
       el.removeAttribute("data-rendered");
@@ -83,8 +86,10 @@ export class SurveyPage extends SurveyPanelBase {
     this.panelBase = props.page;
   }
   componentWillReceiveProps(nextProps: any) {
+    this.unMakeBaseElementReact(this.panelBase);
     super.componentWillReceiveProps(nextProps);
     this.panelBase = nextProps.page;
+    this.makeBaseElementReact(this.panelBase);
   }
   public get page(): PageModel {
     return this.panelBase as PageModel;
@@ -119,34 +124,15 @@ export class SurveyPanel extends SurveyPanelBase {
   constructor(props: any) {
     super(props);
     this.panelBase = props.panel;
-    this.state = { modelChanged: 0 };
   }
   componentWillReceiveProps(nextProps: any) {
+    this.unMakeBaseElementReact(this.panelBase);
     super.componentWillReceiveProps(nextProps);
     this.panelBase = nextProps.panel;
+    this.makeBaseElementReact(this.panelBase);
   }
   public get panel(): PanelModel {
     return this.panelBase as PanelModel;
-  }
-  componentDidMount() {
-    super.componentDidMount();
-    let self = this;
-    this.panelBase.registerFunctionOnPropertiesValueChanged(
-      ["isVisible", "state"],
-      function() {
-        self.setState({ modelChanged: self.state.modelChanged + 1 });
-      },
-      "react"
-    );
-  }
-  componentWillUnmount() {
-    super.componentWillUnmount();
-    if (this.panelBase) {
-      this.panelBase.unRegisterFunctionOnPropertiesValueChanged(
-        ["isVisible", "state"],
-        "react"
-      );
-    }
   }
   render(): JSX.Element {
     if (this.panelBase == null || this.survey == null || this.creator == null)
@@ -195,7 +181,6 @@ export class SurveyPanel extends SurveyPanelBase {
         } else {
           this.panel.collapse();
         }
-        this.setState({ modelChanged: this.state.modelChanged + 1 });
       };
       expandCollapse = <span className={iconCss} />;
     }
@@ -225,10 +210,17 @@ export class SurveyRow extends SurveyElementBase {
   constructor(props: any) {
     super(props);
     this.setProperties(props);
+  }
+  componentWillMount() {
     this.makeBaseElementReact(this.row);
   }
+  componentWillUnmount() {
+    this.unMakeBaseElementReact(this.row);
+  }
   componentWillReceiveProps(nextProps: any) {
+    this.unMakeBaseElementReact(this.row);
     this.setProperties(nextProps);
+    this.makeBaseElementReact(this.row);
   }
   private setProperties(props: any) {
     this.row = props.row;

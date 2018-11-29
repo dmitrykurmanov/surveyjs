@@ -234,7 +234,11 @@ export class QuestionPanelDynamicModel extends Question
       this.items.length == 0
     )
       return;
-    if (options.name === "visibleIndex" || options.name === "isVisible") return;
+    var property = JsonObject.metaData.findProperty(
+      element.getType(),
+      options.name
+    );
+    if (!property) return;
     var panels = this.panels;
     for (var i = 0; i < panels.length; i++) {
       var question = panels[i].getQuestionByName(element.name);
@@ -1080,9 +1084,8 @@ export class QuestionPanelDynamicModel extends Question
   }
   protected createNewPanel(): PanelModel {
     var panel = this.createAndSetupNewPanelObject();
-    var jObj = new JsonObject();
-    var json = jObj.toJsonObject(this.template);
-    jObj.toObject(json, panel);
+    var json = this.template.toJSON();
+    new JsonObject().toObject(json, panel);
     panel.renderWidth = "100%";
     return panel;
   }
@@ -1117,6 +1120,9 @@ export class QuestionPanelDynamicModel extends Question
     super.onSurveyValueChanged(newValue);
     for (var i = 0; i < this.items.length; i++) {
       this.items[i].onSurveyValueChanged();
+    }
+    if (newValue === undefined) {
+      this.setValueBasedOnPanelCount();
     }
   }
   protected onSetData() {
