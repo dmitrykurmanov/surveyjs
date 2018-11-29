@@ -11,11 +11,6 @@ import { ReactQuestionFactory } from "./reactquestionfactory";
 export class SurveyQuestionCheckbox extends SurveyQuestionElementBase {
   constructor(props: any) {
     super(props);
-    this.state = { choicesChanged: 0 };
-    var self = this;
-    this.question.choicesChangedCallback = function() {
-      self.setState({ choicesChanged: self.state.choicesChanged + 1 });
-    };
   }
   protected get question(): QuestionCheckboxModel {
     return this.questionBase as QuestionCheckboxModel;
@@ -25,10 +20,8 @@ export class SurveyQuestionCheckbox extends SurveyQuestionElementBase {
     var cssClasses = this.question.cssClasses;
     return (
       <fieldset className={cssClasses.root}>
+        <legend aria-label={this.question.locTitle.renderedHtml} />
         {this.getItems(cssClasses)}
-        <legend style={{ display: "none" }}>
-          {this.question.locTitle.renderedHtml}
-        </legend>
       </fieldset>
     );
   }
@@ -95,6 +88,12 @@ export class SurveyQuestionCheckboxItem extends ReactSurveyElement {
     this.question = nextProps.question;
     this.isFirst = nextProps.isFirst;
   }
+  componentWillMount() {
+    this.makeBaseElementReact(this.item);
+  }
+  componentWillUnmount() {
+    this.unMakeBaseElementReact(this.item);
+  }
   handleOnChange(event: any) {
     var newValue = this.question.value;
     if (!newValue) {
@@ -132,7 +131,7 @@ export class SurveyQuestionCheckboxItem extends ReactSurveyElement {
     isChecked: boolean,
     otherItem: JSX.Element
   ): JSX.Element {
-    var id = this.question.inputId + "-" + this.index;
+    var id = this.question.inputId + "_" + this.index;
     var text = this.renderLocString(this.item.locText);
     let itemClass =
       this.cssClasses.item +
@@ -155,7 +154,7 @@ export class SurveyQuestionCheckboxItem extends ReactSurveyElement {
             value={this.item.value}
             id={id}
             style={this.inputStyle}
-            disabled={this.isDisplayMode}
+            disabled={this.isDisplayMode || !this.item.isEnabled}
             checked={isChecked}
             onChange={onItemChanged}
             aria-label={this.item.locText.renderedHtml}

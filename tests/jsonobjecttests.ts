@@ -290,17 +290,7 @@ JsonObject.metaData.addClass(
   "fast"
 );
 
-JsonObject.metaData.addClass("itemvaluelistowner", [
-  {
-    name: "items",
-    onGetValue: function(obj: any) {
-      return ItemValue.getData(obj.items);
-    },
-    onSetValue: function(obj: any, value: any) {
-      ItemValue.setData(obj.items, value);
-    }
-  }
-]);
+JsonObject.metaData.addClass("itemvaluelistowner", ["items:itemvalues"]);
 
 JsonObject.metaData.addClass("item_thelongpart", ["baseSt"]);
 JsonObject.metaData.addClass(
@@ -681,6 +671,7 @@ QUnit.test("ItemValueListOwner deserialization", function(assert) {
 QUnit.test(
   "ItemValueListOwner deserialization, custom property in ItemValue",
   function(assert) {
+    JsonObject.metaData.addProperty("itemvalue", "price:number");
     var list = new ItemValueListOwner();
 
     new JsonObject().toObject(
@@ -696,6 +687,7 @@ QUnit.test(
     );
     assert.equal(list.items.length, 4, "there are 4 items");
     assert.equal(list.items[0]["price"], 55.5, "set custom value correctly");
+    JsonObject.metaData.removeProperty("itemvalue", "price");
   }
 );
 QUnit.test(
@@ -1436,7 +1428,7 @@ QUnit.test("Add itemvalues (array) property into questionbase", function(
   );
   assert.equal(
     property.type,
-    "itemvalues",
+    "itemvalue[]",
     "Property should have correct type"
   );
   assert.equal(
@@ -1621,4 +1613,108 @@ QUnit.test("itemvalues (array) save localized text", function(assert) {
   );
 
   JsonObject.metaData.removeProperty("questionbase", "customArray");
+});
+
+QUnit.test("ItemValue should be deserialized without errors", function(assert) {
+  var list = new ItemValueListOwner();
+
+  var jsonObject = new JsonObject();
+  jsonObject.toObject(
+    {
+      items: [
+        { value: 7, text: "Item 1", price: 55.5 },
+        5,
+        "item",
+        "value1|text1"
+      ]
+    },
+    list
+  );
+  assert.equal(
+    jsonObject.errors.length,
+    0,
+    "there are no errors on deserialization"
+  );
+});
+
+QUnit.test("Extend ItemValue via inheritance with custom property", function(
+  assert
+) {
+  JsonObject.metaData.addClass(
+    "itemvaluesWithPoints",
+    ["points:number"],
+    null,
+    "itemvalue"
+  );
+  JsonObject.metaData.addProperty("itemvalue", "guid");
+  JsonObject.metaData.addProperty("questionbase", {
+    name: "customArray:itemvalues",
+    default: [0]
+  });
+  var p1 = JsonObject.metaData.findProperty("questionbase", "customArray");
+  p1["typeValue"] = "itemvaluesWithPoints";
+  p1["className"] = "itemvaluesWithPoints";
+  var question = new Question("q1");
+
+  question["customArray"][0]["points"] = 1;
+  assert.equal(
+    question["customArray"][0]["points"],
+    1,
+    "one should be able to read and write the custom property"
+  );
+  question["customArray"][0]["guid"] = "2";
+  assert.equal(
+    question["customArray"][0]["guid"],
+    "2",
+    "one should be able to read and write the inherited custom property"
+  );
+
+  var jsonObject = new JsonObject();
+  jsonObject.toObject(
+    {
+      customArray: [
+        { value: 7, text: "Item 1", points: 5 },
+        5,
+        "item",
+        "value1|text1"
+      ]
+    },
+    question
+  );
+  assert.equal(
+    question["customArray"].length,
+    4,
+    "custom array should be deserialized"
+  );
+  assert.equal(
+    question["customArray"][0]["points"],
+    5,
+    "custom property value should be deserialized"
+  );
+  assert.equal(
+    jsonObject.errors.length,
+    0,
+    "there are no errors on deserialization"
+  );
+
+  JsonObject.metaData.removeProperty("questionbase", "customArray");
+  JsonObject.metaData.removeProperty("itemvalue", "guid");
+});
+
+QUnit.test("isDescendantOf", function(assert) {
+  JsonObject.metaData.addClass(
+    "itemvaluesWithPoints",
+    ["points:number"],
+    null,
+    "itemvalue"
+  );
+
+  assert.ok(
+    JsonObject.metaData.isDescendantOf("itemvaluesWithPoints", "itemvalue"),
+    "itemvaluesWithPoints is a descendant of the itemvalue"
+  );
+  assert.ok(
+    JsonObject.metaData.isDescendantOf("itemvalue", "itemvalue"),
+    "itemvalue is a descendant of the itemvalue"
+  );
 });

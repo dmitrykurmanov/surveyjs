@@ -12,8 +12,7 @@ import { SurveyTimerPanel } from "./reacttimerpanel";
 import { SurveyElementBase, SurveyLocString } from "./reactquestionelement";
 import { PageModel } from "../page";
 
-export class Survey extends React.Component<any, any>
-  implements ISurveyCreator {
+export class Survey extends SurveyElementBase implements ISurveyCreator {
   public static get cssType(): string {
     return surveyCss.currentType;
   }
@@ -31,11 +30,12 @@ export class Survey extends React.Component<any, any>
     this.handleTryAgainClick = this.handleTryAgainClick.bind(this);
     this.state = this.getState();
     this.updateSurvey(props);
-    this.setSurveyEvents(props);
   }
   componentWillReceiveProps(nextProps: any) {
+    this.unMakeBaseElementReact(this.survey);
     this.setState(this.getState());
     this.updateSurvey(nextProps);
+    this.makeBaseElementReact(this.survey);
   }
   componentDidUpdate() {
     if (this.isCurrentPageChanged) {
@@ -44,33 +44,7 @@ export class Survey extends React.Component<any, any>
     }
   }
   componentWillMount() {
-    this.survey.setPropertyValueCoreHandler = (
-      hash: any,
-      key: string,
-      val: any
-    ) => {
-      if (hash[key] !== val) {
-        hash[key] = val;
-        this.setState((state: any) => {
-          var newState: { [index: string]: any } = {};
-          newState[key] = val;
-          return newState;
-        });
-      }
-    };
-
-    this.survey.iteratePropertiesHash((hash, key) => {
-      var val: any = hash[key];
-      if (Array.isArray(val)) {
-        var val: any = val;
-        val["onArrayChanged"] = () =>
-          this.setState((state: any) => {
-            var newState: { [index: string]: any } = {};
-            newState[key] = val;
-            return newState;
-          });
-      }
-    });
+    this.makeBaseElementReact(this.survey);
   }
   componentDidMount() {
     var el = this.refs["root"];
@@ -80,15 +54,8 @@ export class Survey extends React.Component<any, any>
     }
   }
   componentWillUnmount() {
+    this.unMakeBaseElementReact(this.survey);
     if (this.survey) {
-      this.survey.setPropertyValueCoreHandler = undefined;
-      this.survey.iteratePropertiesHash((hash, key) => {
-        var val: any = hash[key];
-        if (Array.isArray(val)) {
-          var val: any = val;
-          val["onArrayChanged"] = () => {};
-        }
-      });
       this.survey.stopTimer();
       this.survey.onCurrentPageChanged.remove(this.onCurrentPageChangedHandler);
     }
@@ -291,12 +258,13 @@ export class Survey extends React.Component<any, any>
         }
       }
     }
-
     //set the first page
     var dummy = this.survey.currentPage;
+
+    this.setSurveyEvents(newProps);
   }
   private getState() {
-    return { pageIndexChange: 0, isCompleted: false, modelChanged: 0 };
+    return { pageIndexChange: 0, modelChanged: 0 };
   }
   protected setSurveyEvents(newProps: any) {
     var self = this;
@@ -304,23 +272,13 @@ export class Survey extends React.Component<any, any>
     this.survey.renderCallback = function() {
       self.setState({ modelChanged: self.state.modelChanged + 1 });
     };
-    this.survey.onComplete.add(sender => {
-      self.setState({ isCompleted: true });
-    });
     this.survey.onPartialSend.add(sender => {
       self.setState(self.state);
     });
     this.survey.onCurrentPageChanged.add(this.onCurrentPageChangedHandler);
-    this.survey.onVisibleChanged.add((sender, options) => {
-      if (options.question && options.question.react) {
-        var state = options.question.react.state;
-        state.visible = options.question.visible;
-        options.question.react.setState(state);
-      }
-    });
     this.survey.onValueChanged.add((sender, options) => {
       if (options.question && options.question.react) {
-        var state = options.question.react.state;
+        var state = options.question.react.state || {};
         state.value = options.value;
         options.question.react.setState(state);
       }

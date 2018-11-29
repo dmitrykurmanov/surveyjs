@@ -1,6 +1,5 @@
 import { ILocalizableOwner, LocalizableString } from "./localizablestring";
 import { HashTable, Helpers } from "./helpers";
-import { ItemValue } from "./itemvalue";
 import { CustomPropertiesCollection, JsonObject } from "./jsonobject";
 
 export interface ISurveyData {
@@ -38,6 +37,11 @@ export interface ISurvey extends ITextProcessor {
   ): any;
   questionRemoved(question: IQuestion): any;
   panelRemoved(panel: IElement): any;
+  questionRenamed(
+    question: IQuestion,
+    oldName: string,
+    oldValueName: string
+  ): any;
   validateQuestion(question: IQuestion): SurveyError;
   validatePanel(panel: IPanel): SurveyError;
   hasVisibleQuestionByValueName(valueName: string): boolean;
@@ -79,9 +83,9 @@ export interface ISurvey extends ITextProcessor {
   ): any;
   updateChoicesFromServer(
     question: IQuestion,
-    choices: Array<ItemValue>,
+    choices: Array<any>,
     serverResult: any
-  ): Array<ItemValue>;
+  ): Array<any>;
   updateQuestionCssClasses(question: IQuestion, cssClasses: any): any;
   updatePanelCssClasses(panel: IPanel, cssClasses: any): any;
   afterRenderQuestion(question: IQuestion, htmlElement: any): any;
@@ -166,6 +170,8 @@ export interface IPage extends IPanel, IConditionRunner {}
  */
 export class Base {
   public static commentPrefix: string = "-Comment";
+  public static createItemValue: (item: any) => any;
+  public static itemValueLocStrChanged: (arr: Array<any>) => void;
   /**
    * A static methods that returns true if a value underfined, null, empty string or empty array.
    * @param value
@@ -238,7 +244,8 @@ export class Base {
       let item = this.arraysInfo[key];
       if (item && item.isItemValues) {
         var arr = this.getPropertyValue(key);
-        if (arr) ItemValue.locStrsChanged(arr);
+        if (arr && !!Base.itemValueLocStrChanged)
+          Base.itemValueLocStrChanged(arr);
       }
     }
     for (let key in this.localizableStrings) {
@@ -490,12 +497,9 @@ export class Base {
     for (var i = 0; i < dest.length; i++) {
       var item = dest[i];
       if (isItemValues) {
-        if (typeof dest[i].getType === "function") {
-          item = new ItemValue(null, undefined, dest[i].getType());
-        } else {
-          item = new ItemValue(null);
+        if (!!Base.createItemValue) {
+          item = Base.createItemValue(item);
         }
-        item.setData(dest[i]);
       }
       Object.getPrototypeOf(src).push.call(src, item);
       //src["origionalPush"].apply(src, [item]);
@@ -603,8 +607,13 @@ export class SurveyElement extends Base implements ISurveyElement {
     return this.getPropertyValue("name", "");
   }
   public set name(val: string) {
+    var oldValue = this.name;
     this.setPropertyValue("name", val);
+    if (!this.isLoadingFromJson && !!oldValue) {
+      this.onNameChanged(oldValue);
+    }
   }
+  protected onNameChanged(oldValue: string) {}
   /**
    * The list of errors. It is created by callig hasErrors functions
    * @see hasErrors

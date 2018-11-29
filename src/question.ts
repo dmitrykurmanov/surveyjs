@@ -20,7 +20,7 @@ import { ConditionRunner } from "./conditions";
 import { QuestionCustomWidget } from "./questionCustomWidgets";
 import { surveyCss } from "./defaultCss/cssstandard";
 import { CustomWidgetCollection } from "./questionCustomWidgets";
-import { timingSafeEqual } from "crypto";
+
 /**
  * A base class for all questions.
  */
@@ -79,7 +79,8 @@ export class Question extends SurveyElement
     );
   }
   public getValueName(): string {
-    return this.valueName ? this.valueName : this.name;
+    if (!!this.valueName) return this.valueName.toString();
+    return this.name;
   }
   /**
    * Use this property if you want to store the question result in the name different from the question name.
@@ -90,7 +91,25 @@ export class Question extends SurveyElement
     return this.getPropertyValue("valueName", "");
   }
   public set valueName(val: string) {
+    var oldValueName = this.getValueName();
     this.setPropertyValue("valueName", val);
+    this.onValueNameChanged(oldValueName);
+  }
+  protected onValueNameChanged(oldValue: string) {
+    if (!this.survey) return;
+    this.survey.questionRenamed(
+      this,
+      this.name,
+      !!oldValue ? oldValue : this.name
+    );
+  }
+  protected onNameChanged(oldValue: string) {
+    if (!this.survey) return;
+    this.survey.questionRenamed(
+      this,
+      oldValue,
+      this.valueName ? this.valueName : oldValue
+    );
   }
   /**
    * Get/set the page where the question is located.
@@ -736,7 +755,11 @@ export class Question extends SurveyElement
     }
   }
   public get displayValue(): any {
-    return this.getDisplayValue(true);
+    this.updateDisplayValue();
+    return this.getPropertyValue("displayValue", "");
+  }
+  protected updateDisplayValue(): any {
+    this.setPropertyValue("displayValue", this.getDisplayValue(true));
   }
   public getDisplayValue(keysAsText: boolean): any {
     if (this.customWidget) {
@@ -949,6 +972,7 @@ export class Question extends SurveyElement
     this.value = this.valueFromData(newValue);
     this.fireCallback(this.commentChangedCallback);
     this.isValueChangedInSurvey = false;
+    this.updateDisplayValue();
   }
   public setVisibleIndex(val: number): number {
     if (!this.isVisible || !this.hasTitle) {
@@ -1024,7 +1048,11 @@ JsonObject.metaData.addClass("question", [
     isSerializable: false,
     choices: function(obj: any) {
       var survey = obj ? obj.survey : null;
-      return survey ? survey.pages : [];
+      return survey
+        ? survey.pages.map((p: any) => {
+            return { value: p.name, text: p.title };
+          })
+        : [];
     }
   },
   { name: "title:text", serializationProperty: "locTitle" },
