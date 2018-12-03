@@ -123,7 +123,7 @@
 		    const surveyModel = this.get().surveyModel;
 		    const handler = this.setSurveyModel.bind(this);
 		    surveyModel.onCurrentPageChanged.add(handler);
-		    surveyModel.onVisibleChanged.add(handler);
+		    // surveyModel.onVisibleChanged.add(handler);
 		    surveyModel.onValueChanged.add(handler);
 		    surveyModel.onComplete.add(handler);
 		    surveyModel.onPartialSend.add(handler);
@@ -135,7 +135,7 @@
 		    const surveyModel = this.get().surveyModel;
 		    const handler = this.setSurveyModel.bind(this);
 		    surveyModel.onCurrentPageChanged.remove(handler);
-		    surveyModel.onVisibleChanged.remove(handler);
+		    // surveyModel.onVisibleChanged.remove(handler);
 		    surveyModel.onValueChanged.remove(handler);
 		    surveyModel.onComplete.remove(handler);
 		    surveyModel.onPartialSend.remove(handler);
