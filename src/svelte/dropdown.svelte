@@ -5,7 +5,9 @@
                 class={question.cssClasses.control} aria-label={question.locTitle.renderedHtml}>
                 <option value=''>{question.optionsCaption}</option>
                 {#each question.visibleChoices as item}
-                    <option value={item.value}>{item.text}</option>
+                    <option value={item.value} selected={question.value == item.value}>
+                      {item.text}
+                    </option>
                 {/each}
             </select>
         </div>
