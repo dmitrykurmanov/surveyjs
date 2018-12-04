@@ -11,6 +11,6 @@
     "allowSyntheticDefaultImports": true,
     "jsx": "react"
   },
-  "exclude": ["src/entries/**/*.ts"],
+  "exclude": ["src/entries/**/*.ts", "src/svelte/**/*.svelte"],
   "include": ["src/**/*.ts"]
 }
