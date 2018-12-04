@@ -47,7 +47,6 @@
     },
     onstate({ previous }) {
       if (!previous) {
-        debugger;
         // only first time call
         const window = this.get().window;
         const survey = this.get().survey;

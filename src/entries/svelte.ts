@@ -1,5 +1,6 @@
 // model
-export * from "./chunks/model";
+import "../main.scss";
+export { StylesManager } from "../stylesmanager";
 
 // localization
 import "./chunks/localization";
