@@ -1,6 +1,7 @@
 // model
-import "../main.scss";
-export { StylesManager } from "../stylesmanager";
+// import "../main.scss";
+// export { StylesManager } from "../stylesmanager";
+export * from "./chunks/model";
 
 // localization
 import "./chunks/localization";
@@ -18,8 +19,16 @@ export {
   defaultBootstrapMaterialCss
 } from "../defaultCss/cssbootstrapmaterial";
 
-export { SurveyModel as Model } from "../survey";
+export { SvelteSurveyModel as Model } from "../svelte/surveyModel";
+export { SvelteSurveyWindowModel as WindowModel } from "../svelte/surveyModel";
+
 import Survey from "../svelte/survey.svelte";
 export { Survey };
 import SurveyWindow from "../svelte/window.svelte";
 export { SurveyWindow };
+
+
+// import { SvelteSurveyModel } from "../svelte/surveyModel";
+// export { SvelteSurveyModel as Model };
+// import { SvelteSurveyWindowModel } from "../svelte/surveyModel";
+// export { SvelteSurveyWindowModel as WindowModel };
