@@ -130,6 +130,10 @@
 		    surveyModel.onPageVisibleChanged.add(handler);
 		    surveyModel.onStarted.add(handler);
 		    surveyModel.onTimer.add(handler);
+
+		    surveyModel.renderCallback = () => {
+		      this.set({ surveyModel, ...surveyModel });
+		    };
 		  },
 		  ondestroy() {
 		    const surveyModel = this.get().surveyModel;
@@ -142,6 +146,8 @@
 		    surveyModel.onPageVisibleChanged.remove(handler);
 		    surveyModel.onStarted.remove(handler);
 		    surveyModel.onTimer.remove(handler);
+
+		    surveyModel.renderCallback = null;
 		  },
 		  computed: {
 		    hasTitle: ({ surveyModel }) => {

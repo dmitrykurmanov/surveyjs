@@ -25,7 +25,7 @@
 
 <script>
   import { surveyCss } from "../defaultCss/cssstandard";
-  import { SurveyWindowModel } from "../SurveyWindow";
+  import { SvelteSurveyWindowModel } from "./surveyModel";
   import SurveyString from "./string.svelte";
   import Survey from "./survey.svelte";
 
@@ -57,7 +57,7 @@
         if (window) {
           this.set({ surveyWindow: window });
         } else {
-          this.set({ surveyWindow: new SurveyWindowModel(null, survey) });
+          this.set({ surveyWindow: new SvelteSurveyWindowModel(null, survey) });
         }
 
         surveyWindow = this.get().surveyWindow;
