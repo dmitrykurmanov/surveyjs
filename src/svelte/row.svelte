@@ -2,7 +2,7 @@
 	  {#each row.elements as element (element.id)}
         {#if element.visible}
           <div class={questionRootClass} style="paddingLeft: {getIndentSize(element, element.indent)}; paddingRight: {getIndentSize(element, element.rightIndent)}; width: {element.renderWidth}">
-            <SurveyElement id={element.id}  element={element} survey={survey} css={css} />
+            <SurveyElement element={element} survey={survey} css={css} />
           </div>
         {/if}
     {/each}

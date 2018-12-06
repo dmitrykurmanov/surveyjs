@@ -1,4 +1,5 @@
 <fieldset class={question.cssClasses.root}>
+    <legend>{question.locTitle.renderedHtml}</legend>
     {#each question.visibleChoices as item, index}
         <div key={item.value} class={getItemClass(item, question)} >
             <label class={question.cssClasses.label}>
@@ -36,10 +37,6 @@
             </label>
         </div>
     {/each}
-    
-    <legend style="display: none;">
-        {question.locTitle.renderedHtml}
-    </legend>
 </fieldset>
 
 <script>

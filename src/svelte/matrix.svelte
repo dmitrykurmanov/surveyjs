@@ -1,4 +1,5 @@
 <fieldset>
+    <legend>{question.locTitle.renderedHtml}</legend>
     <table class={question.cssClasses.root}>
         <thead>
             <tr>
@@ -42,7 +43,6 @@
             {/each}       
         </tbody>
     </table>
-    <legend style="display: none;">{question.locTitle.renderedHtml}</legend>
 </fieldset>
 
 <script>

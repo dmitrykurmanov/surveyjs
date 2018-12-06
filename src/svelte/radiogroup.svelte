@@ -1,4 +1,5 @@
-<fieldset class={question.cssClasses.root}>
+<fieldset class={question.cssClasses.root}> 
+  <legend>{question.locTitle.renderedHtml}</legend>
 	{#each question.visibleChoices as item, index}
         <div class={getItemClass(question, item)} >
             <label class={question.cssClasses.label}>
@@ -24,7 +25,6 @@
             value={question.clearButtonCaption}/>
       </div>
     {/if}
-    <legend style="display: none;">{question.locTitle.renderedHtml}</legend>
 </fieldset>
 
 <script>

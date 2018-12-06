@@ -1,4 +1,4 @@
-<div class={getQuestionClass(element, css)}>
+<div class={getQuestionClass(element, css)} id={element.id}>
     {#if element.hasTitleOnLeftTop}
         <div class={element.hasTitleOnLeft ? 'title-left' : ''}>
             {#if element.hasTitle}
