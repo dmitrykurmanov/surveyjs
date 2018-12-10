@@ -1255,7 +1255,7 @@ export class SurveyModel extends Base
   public get data(): any {
     var result: { [index: string]: any } = {};
     for (var key in this.valuesHash) {
-      result[key] = this.valuesHash[key];
+      result[key] = this.getDataValueCore(this.valuesHash, key);
     }
     return result;
   }
@@ -1321,7 +1321,8 @@ export class SurveyModel extends Base
   getFilteredValues(): any {
     var values: { [index: string]: any } = {};
     for (var key in this.variablesHash) values[key] = this.variablesHash[key];
-    for (var key in this.valuesHash) values[key] = this.valuesHash[key];
+    for (var key in this.valuesHash)
+      values[key] = this.getDataValueCore(this.valuesHash, key);
     values["conditionVersion"] = ++this.conditionVersion;
     return values;
   }
@@ -1341,6 +1342,9 @@ export class SurveyModel extends Base
     this.notifyElementsOnAnyValueOrVariableChanged("");
     this.runConditions();
   }
+  public getDataValueCore(valuesHash: any, key: string) {
+    return valuesHash[key];
+  }
   public setDataValueCore(valuesHash: any, key: string, value: any) {
     valuesHash[key] = value;
   }
@@ -1355,7 +1359,7 @@ export class SurveyModel extends Base
     var result: { [index: string]: any } = {};
     for (var key in this.valuesHash) {
       if (key.indexOf(this.commentPrefix) > 0) {
-        result[key] = this.valuesHash[key];
+        result[key] = this.getDataValueCore(this.valuesHash, key);
       }
     }
     return result;
@@ -1436,8 +1440,11 @@ export class SurveyModel extends Base
     if (newPage == this.currentPageValue) return;
     var oldValue = this.currentPageValue;
     if (!this.currentPageChanging(newPage, oldValue)) return;
+    if (!!newPage) {
+      newPage.onFirstRendering();
+    }
     this.currentPageValue = newPage;
-    if (newPage) {
+    if (!!newPage) {
       newPage.updateCustomWidgets();
       newPage.setWasShown(true);
     }
@@ -1672,6 +1679,9 @@ export class SurveyModel extends Base
     this.setPropertyValue("isDesignMode", value);
     this.onIsSinglePageChanged();
   }
+  /**
+   * Set this property to true, to show all elements in the survey, regardless their visibility. It is false by default.
+   */
   public get showInvisibleElements(): boolean {
     return this.getPropertyValue("showInvisibleElements", false);
   }
@@ -2449,10 +2459,13 @@ export class SurveyModel extends Base
     this.notifyElementsOnAnyValueOrVariableChanged(valueName);
   }
   private notifyElementsOnAnyValueOrVariableChanged(name: string) {
+    if (this.isEndLoadingFromJson === "processing") return;
     for (var i = 0; i < this.pages.length; i++) {
       this.pages[i].onAnyValueChanged(name);
     }
-    this.locStrsChanged();
+    if (!this.isEndLoadingFromJson) {
+      this.locStrsChanged();
+    }
   }
   private notifyAllQuestionsOnValueChanged() {
     var questions = this.getAllQuestions();
@@ -2488,7 +2501,7 @@ export class SurveyModel extends Base
     return result;
   }
   private checkTriggers(key: any, isOnNextPage: boolean) {
-    if (this.isCompleted) return;
+    if (this.isCompleted || this.triggers.length == 0) return;
     var values = this.getFilteredValues();
     var properties = this.getFilteredProperties();
     for (var i: number = 0; i < this.triggers.length; i++) {
@@ -2685,6 +2698,7 @@ export class SurveyModel extends Base
     this.doElementsOnLoad();
     this.isEndLoadingFromJson = "conditions";
     this.runConditions();
+    this.notifyElementsOnAnyValueOrVariableChanged("");
     this.isEndLoadingFromJson = null;
     this.updateVisibleIndexes();
   }
@@ -2815,7 +2829,7 @@ export class SurveyModel extends Base
    */
   public getValue(name: string): any {
     if (!name || name.length == 0) return null;
-    var value = this.valuesHash[name];
+    var value = this.getDataValueCore(this.valuesHash, name);
     return this.getUnbindValue(value);
   }
   /**
@@ -2865,7 +2879,12 @@ export class SurveyModel extends Base
     return baseName + index;
   }
   protected tryGoNextPageAutomatic(name: string) {
-    if (!this.goNextPageAutomatic || !this.currentPage) return;
+    if (
+      !!this.isEndLoadingFromJson ||
+      !this.goNextPageAutomatic ||
+      !this.currentPage
+    )
+      return;
     var question = <Question>this.getQuestionByValueName(name);
     if (
       !question ||
@@ -2930,6 +2949,16 @@ export class SurveyModel extends Base
   public clearValue(name: string) {
     this.setValue(name, null);
     this.setComment(name, null);
+  }
+  /**
+   * Set this value to true, to clear value on disable items in checkbox, dropdown and radiogroup questions.
+   * By default values are not cleared on disabled the corresponded items. This property is not persisted in survey json and you have to set it in code.
+   */
+  public get clearValueOnDisableItems(): boolean {
+    return this.getPropertyValue("clearValueOnDisableItems", false);
+  }
+  public set clearValueOnDisableItems(val: boolean) {
+    this.setPropertyValue("clearValueOnDisableItems", val);
   }
   questionVisibilityChanged(question: IQuestion, newValue: boolean) {
     this.updateVisibleIndexes();
