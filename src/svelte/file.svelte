@@ -30,7 +30,7 @@
                 {/if}
 
                 {#if question.canPreviewImage(val)}
-                  <img src={val.content} height={question.imageHeight} width={question.imageWidth} alt="File preview">
+                  <img src={val.content} {...imgSize} alt="File preview">
                 {/if}
 
                 {#if val.name}
@@ -75,6 +75,21 @@
       },
       doRemoveFile(data) {
         this.get().question.removeFile(data);
+      }
+    },
+    computed: {
+      imgSize: ({ question }) => {
+        let attrs = {};
+
+        if (typeof question.imageHeight !== "undefined") {
+          attrs["height"] = question.imageHeight;
+        }
+
+        if (typeof question.imageWidth !== "undefined") {
+          attrs["width"] = question.imageWidth;
+        }
+
+        return attrs;
       }
     },
     helpers: {
