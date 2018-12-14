@@ -812,9 +812,13 @@ QUnit.test("SelectBase visibleChoices order", function(assert) {
 QUnit.test("Question callbacks test", function(assert) {
   var question = new QuestionTextModel("textQuestion");
   var valueChanged = 0;
+  var _valueChanged = 0;
   var commentChanged = 0;
   var visibleChanged = 0;
   var visibleIndexChanged = 0;
+  question._valueChangedCallback = function() {
+    _valueChanged++;
+  };
   question.valueChangedCallback = function() {
     valueChanged++;
   };
@@ -831,10 +835,15 @@ QUnit.test("Question callbacks test", function(assert) {
   question.comment = "comment";
   question.visible = false;
   question.setVisibleIndex(5);
-  assert.equal(valueChanged, 1, "value changed on time");
-  assert.equal(commentChanged, 1, "comment changed on time");
-  assert.equal(visibleChanged, 1, "visibiblity changed on time");
-  assert.equal(visibleIndexChanged, 1, "visibleIndex changed on time");
+  assert.equal(
+    _valueChanged,
+    1,
+    "value changed aux callbacl is called one time"
+  );
+  assert.equal(valueChanged, 1, "value changed one time");
+  assert.equal(commentChanged, 1, "comment changed one time");
+  assert.equal(visibleChanged, 1, "visibiblity changed one time");
+  assert.equal(visibleIndexChanged, 1, "visibleIndex changed one time");
 });
 QUnit.test("Init SelectBase with comment comment", function(assert) {
   var survey = new SurveyModel();
@@ -1530,6 +1539,23 @@ QUnit.test(
   }
 );
 QUnit.test(
+  "radiogroup.choicesEnableIf, clear value on making the value disable, survey.clearValueOnDisableItems",
+  function(assert) {
+    var survey = new SurveyModel();
+    survey.clearValueOnDisableItems = true;
+    var page = survey.addNewPage("p1");
+    var qBestCar = new QuestionRadiogroupModel("bestCar");
+    qBestCar.choices = ["Audi", "BMW", "Mercedes", "Volkswagen"];
+    qBestCar.choicesEnableIf = "{cars} contains {item}";
+    page.addElement(qBestCar);
+    survey.setValue("cars", ["BMW", "Audi"]);
+    qBestCar.value = "Audi";
+    assert.equal(qBestCar.value, "Audi", "Audi is selected");
+    survey.setValue("cars", ["BMW"]);
+    assert.equal(qBestCar.isEmpty(), true, "Audi is cleared");
+  }
+);
+QUnit.test(
   "checkbox.choicesVisibleIf, clear value on making the value invisible, bug #1093",
   function(assert) {
     var survey = new SurveyModel();
@@ -1537,6 +1563,25 @@ QUnit.test(
     var qBestCar = new QuestionCheckboxModel("bestCar");
     qBestCar.choices = ["Audi", "BMW", "Mercedes", "Volkswagen"];
     qBestCar.choicesVisibleIf = "{cars} contains {item}";
+    page.addElement(qBestCar);
+    survey.setValue("cars", ["BMW", "Audi", "Mercedes"]);
+    qBestCar.value = ["BMW", "Audi"];
+    assert.deepEqual(qBestCar.value, ["BMW", "Audi"], "Audi is selected");
+    survey.setValue("cars", ["BMW"]);
+    assert.deepEqual(qBestCar.value, ["BMW"], "Audi is removed");
+    survey.setValue("cars", ["Mercedes"]);
+    assert.deepEqual(qBestCar.isEmpty(), true, "All checks are removed");
+  }
+);
+QUnit.test(
+  "checkbox.choicesEnableIf, clear value on making the value disable, survey.clearValueOnDisableItems",
+  function(assert) {
+    var survey = new SurveyModel();
+    survey.clearValueOnDisableItems = true;
+    var page = survey.addNewPage("p1");
+    var qBestCar = new QuestionCheckboxModel("bestCar");
+    qBestCar.choices = ["Audi", "BMW", "Mercedes", "Volkswagen"];
+    qBestCar.choicesEnableIf = "{cars} contains {item}";
     page.addElement(qBestCar);
     survey.setValue("cars", ["BMW", "Audi", "Mercedes"]);
     qBestCar.value = ["BMW", "Audi"];
