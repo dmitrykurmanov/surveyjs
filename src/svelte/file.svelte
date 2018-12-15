@@ -81,13 +81,11 @@
       imgSize: ({ question }) => {
         let attrs = {};
 
-        if (typeof question.imageHeight !== "undefined") {
+        if (typeof question.imageHeight !== "undefined")
           attrs["height"] = question.imageHeight;
-        }
 
-        if (typeof question.imageWidth !== "undefined") {
+        if (typeof question.imageWidth !== "undefined")
           attrs["width"] = question.imageWidth;
-        }
 
         return attrs;
       }
