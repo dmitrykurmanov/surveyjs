@@ -13,9 +13,9 @@ import { VueSurveyModel } from "./surveyModel";
 
 @Component
 export class Row extends Vue {
-  @Prop row: any;
-  @Prop css: any;
-  @Prop survey: SurveyModel;
+  @Prop() row: any;
+  @Prop() css: any;
+  @Prop() survey: SurveyModel;
   mounted() {
     if (!!this.row) {
       VueSurveyModel.updatePropertiesHash(this.row);

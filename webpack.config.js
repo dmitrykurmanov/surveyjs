@@ -202,8 +202,7 @@ module.exports = function(options) {
   var config = {
     entry: {},
     resolve: {
-      extensions: [".ts", ".js", ".tsx", ".scss"],
-      mainFields: ["svelte", "browser", "module", "main"],
+      extensions: [".svelte", ".vue", ".ts", ".js", ".tsx", ".scss"],
       alias: {
         tslib: path.join(__dirname, "./src/entries/chunks/helpers.ts")
       }
@@ -255,7 +254,6 @@ module.exports = function(options) {
               loader: "css-loader",
               options: {
                 sourceMap: true,
-                minimize: options.buildType === "prod",
                 importLoaders: true
               }
             },
