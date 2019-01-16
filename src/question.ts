@@ -21,6 +21,12 @@ import { QuestionCustomWidget } from "./questionCustomWidgets";
 import { surveyCss } from "./defaultCss/cssstandard";
 import { CustomWidgetCollection } from "./questionCustomWidgets";
 
+export interface IConditionObject {
+  name: string;
+  text: string;
+  question: Question;
+}
+
 /**
  * A base class for all questions.
  */
@@ -46,8 +52,8 @@ export class Question extends SurveyElement
   private questionComment: string;
   private textPreProcessor: TextPreProcessor;
   private conditionEnabelRunner: ConditionRunner;
+  private conditionRequiredRunner: ConditionRunner;
   valueChangedCallback: () => void;
-  _valueChangedCallback: () => void;
   commentChangedCallback: () => void;
   validateValueCallback: () => SurveyError;
   questionTitleTemplateCallback: () => string;
@@ -58,7 +64,7 @@ export class Question extends SurveyElement
     this.onCreating();
     var self = this;
     this.createNewArray("validators", function(validator: any) {
-      validator.locOwner = self;
+      validator.errorOwner = self;
     });
     var locTitleValue = this.createLocalizableString("title", this, true);
     locTitleValue.onRenderedHtmlCallback = function(text) {
@@ -86,14 +92,15 @@ export class Question extends SurveyElement
   /**
    * Use this property if you want to store the question result in the name different from the question name.
    * Question name should be unique in the survey and valueName could be not unique. It allows to share data between several questions with the same valueName.
-   * This sets automatically if name has symbols like '.' period. You can't use '.' symbols to store the results.
+   * The library set the value automatically if the question.name property is not valid. For example, if it contains the period '.' symbol.
+   * In this case if you set the question.name property to 'x.y' then the valueName becomes 'x y'.
    */
   public get valueName(): string {
     return this.getPropertyValue("valueName", "");
   }
   public set valueName(val: string) {
     var oldValueName = this.getValueName();
-    this.setPropertyValue("valueName", val);
+    this.setPropertyValue("valueName", this.getCorrectedName(val));
     this.onValueNameChanged(oldValueName);
   }
   protected onValueNameChanged(oldValue: string) {
@@ -193,7 +200,7 @@ export class Question extends SurveyElement
     if (!newValue) return;
     if (newValue.indexOf(".") > -1) {
       if (!this.valueName || this.isCorrectedNameEqualsValueName(oldValue))
-        this.valueName = this.getCorrectedName(newValue);
+        this.valueName = newValue;
     } else {
       if (!!this.valueName && this.isCorrectedNameEqualsValueName(oldValue)) {
         this.valueName = "";
@@ -201,6 +208,7 @@ export class Question extends SurveyElement
     }
   }
   private getCorrectedName(name: string): string {
+    if (!name || typeof name !== "string") return name;
     while (name.indexOf(".") > -1) name = name.replace(".", " ");
     return name.trim();
   }
@@ -598,6 +606,18 @@ export class Question extends SurveyElement
     }
   }
   /**
+   * An expression that returns true or false. If it returns true the Question becomes required and an end-user has to answer it.
+   * If it returns false the Question then an end-user may not answer it the Question maybe empty.
+   * The library runs the expression on survey start and on changing a question value. If the property is empty then isRequired property is used.
+   * @see isRequired
+   */
+  public get requiredIf(): string {
+    return this.getPropertyValue("requiredIf", "");
+  }
+  public set requiredIf(val: string) {
+    this.setPropertyValue("requiredIf", val);
+  }
+  /**
    * Set it to true, to add a comment for the question.
    */
   public get hasComment(): boolean {
@@ -674,6 +694,7 @@ export class Question extends SurveyElement
       this.runVisibleIfCondition(values, properties);
     }
     this.runEnableIfCondition(values, properties);
+    this.runRequiredIfCondition(values, properties);
   }
   private runVisibleIfCondition(
     values: HashTable<any>,
@@ -694,6 +715,16 @@ export class Question extends SurveyElement
       this.conditionEnabelRunner = new ConditionRunner(this.enableIf);
     this.conditionEnabelRunner.expression = this.enableIf;
     this.readOnly = !this.conditionEnabelRunner.run(values, properties);
+  }
+  private runRequiredIfCondition(
+    values: HashTable<any>,
+    properties: HashTable<any>
+  ) {
+    if (!this.requiredIf) return;
+    if (!this.conditionRequiredRunner)
+      this.conditionRequiredRunner = new ConditionRunner(this.requiredIf);
+    this.conditionRequiredRunner.expression = this.requiredIf;
+    this.isRequired = this.conditionRequiredRunner.run(values, properties);
   }
   protected get no(): string {
     if (this.visibleIndex < 0) return "";
@@ -731,7 +762,6 @@ export class Question extends SurveyElement
     this.setNewValue(newValue);
     if (this.isvalueChangedCallbackFiring) return;
     this.isvalueChangedCallbackFiring = true;
-    this.fireCallback(this._valueChangedCallback);
     this.fireCallback(this.valueChangedCallback);
     this.isvalueChangedCallbackFiring = false;
   }
@@ -765,6 +795,10 @@ export class Question extends SurveyElement
     if (this.isLoadingFromJson) return;
     this.setPropertyValue("displayValue", this.getDisplayValue(true));
   }
+  /**
+   * Return the question value as a display text. For example, for dropdown, it would return the item text instead of item value.
+   * @param keysAsText Set this value to true, to return key (in matrices questions) as display text as well.
+   */
   public getDisplayValue(keysAsText: boolean): any {
     if (this.customWidget) {
       var res = this.customWidget.getDisplayValue(this);
@@ -858,6 +892,16 @@ export class Question extends SurveyElement
   public addConditionNames(names: Array<string>) {
     names.push(this.name);
   }
+  public addConditionObjectsByContext(
+    objects: Array<IConditionObject>,
+    context: any
+  ) {
+    objects.push({
+      name: this.name,
+      text: this.processedTitle,
+      question: this
+    });
+  }
   public getConditionJson(operator: string = null, path: string = null): any {
     var json = new JsonObject().toJsonObject(this);
     json["type"] = this.getType();
@@ -906,11 +950,13 @@ export class Question extends SurveyElement
   private collectErrors(qErrors: Array<SurveyError>) {
     this.onCheckForErrors(qErrors);
     if (qErrors.length == 0) {
-      var error = this.runValidators();
-      if (error) {
+      var errors = this.runValidators();
+      if (errors.length > 0) {
         //validators may change the question value.
         qErrors.length = 0;
-        qErrors.push(error);
+        for (var i = 0; i < errors.length; i++) {
+          qErrors.push(errors[i]);
+        }
       }
     }
     if (this.survey && qErrors.length == 0) {
@@ -926,13 +972,13 @@ export class Question extends SurveyElement
   }
   protected onCheckForErrors(errors: Array<SurveyError>) {
     if (this.hasRequiredError()) {
-      errors.push(new AnswerRequiredError(this.requiredErrorText));
+      errors.push(new AnswerRequiredError(this.requiredErrorText, this));
     }
   }
   protected hasRequiredError(): boolean {
     return this.isRequired && this.isEmpty();
   }
-  protected runValidators(): SurveyError {
+  protected runValidators(): Array<SurveyError> {
     return new ValidatorRunner().run(this);
   }
   private isValueChangedInSurvey = false;
@@ -1030,7 +1076,11 @@ export class Question extends SurveyElement
     if (this.locOwner) return this.locOwner.getProcessedText(text);
     return text;
   }
-
+  //ISurveyErrorOwner
+  getErrorCustomText(text: string, error: SurveyError): string {
+    if (!!this.survey) return this.survey.getErrorCustomText(text, error);
+    return text;
+  }
   //IValidatorOwner
   getValidatorTitle(): string {
     return null;
@@ -1073,6 +1123,7 @@ JsonObject.metaData.addClass("question", [
   "defaultValue:value",
   "correctAnswer:value",
   "isRequired:boolean",
+  "requiredIf:condition",
   {
     name: "requiredErrorText:text",
     serializationProperty: "locRequiredErrorText"

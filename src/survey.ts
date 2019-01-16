@@ -14,6 +14,7 @@ import {
   IPage,
   SurveyError,
   Event,
+  ISurveyErrorOwner,
   ISurveyElement
 } from "./base";
 import { ISurveyTriggerOwner, SurveyTrigger } from "./trigger";
@@ -40,6 +41,7 @@ export class SurveyModel extends Base
     ISurveyData,
     ISurveyImpl,
     ISurveyTriggerOwner,
+    ISurveyErrorOwner,
     ILocalizableOwner {
   [index: string]: any;
   private static stylesManager = new StylesManager();
@@ -169,12 +171,15 @@ export class SurveyModel extends Base
   > = new Event<(sender: SurveyModel, options: any) => any, any>();
   /**
    * The event is fired when the question value is changed. It can be done via UI by a user or programmatically on calling setValue method.
+   * Please use onDynamicPanelItemValueChanged and onMatrixCellValueChanged events to handle changes a question in the Panel Dynamic and a cell question in matrices.
    * <br/> sender the survey object that fires the event
    * <br/> options.name the value name that has been changed
    * <br/> options.question a question which question.name equals to the value name. If there are several questions with the same name, the first question is taken. If there is no such questions, the options.question is null.
    * <br/> options.value a new value
    * @see setValue
    * @see onValueChanging
+   * @see onDynamicPanelItemValueChanged
+   * @see onMatrixCellValueChanged
    */
   public onValueChanged: Event<
     (sender: SurveyModel, options: any) => any,
@@ -300,7 +305,10 @@ export class SurveyModel extends Base
    * @see onValidateQuestion
    * @see onValidatePanel
    */
-  public onServerValidateQuestions: (sender: SurveyModel, options: any) => any;
+  public onServerValidateQuestions: any = new Event<
+    (sender: SurveyModel, options: any) => any,
+    any
+  >();
   /**
    * Use this event to modify the html before rendering, for example html on 'Thank you' page. Options has one parameter: options.html.
    * <br/> sender the survey object that fires the event
@@ -317,6 +325,19 @@ export class SurveyModel extends Base
    * @see onValidateQuestion
    */
   public onValidatePanel: Event<
+    (sender: SurveyModel, options: any) => any,
+    any
+  > = new Event<(sender: SurveyModel, options: any) => any, any>();
+  /**
+   * Use the event to change the default error text.
+   * <br/> sender the survey object that fires the event
+   * <br/> options.text an error text
+   * <br/> options.error an instance of SurveyError object
+   * <br/> options.name the error name. The following error name are available: 
+   * required, requireoneanswer, requirenumeric, exceedsize, webrequest, webrequestempty, otherempty,
+   * uploadingfile, requiredinallrowserror, minrowcounterror, keyduplicationerror, custom
+   */
+  public onErrorCustomText: Event<
     (sender: SurveyModel, options: any) => any,
     any
   > = new Event<(sender: SurveyModel, options: any) => any, any>();
@@ -417,6 +438,18 @@ export class SurveyModel extends Base
    * <br> serverResult - a result that comes from the server as it is.
    */
   public onLoadChoicesFromServer: Event<
+    (sender: SurveyModel, options: any) => any,
+    any
+  > = new Event<(sender: SurveyModel, options: any) => any, any>();
+  /**
+   * The event is fired on processing the text when it finds a text in brackets: {somevalue}. By default it uses the value of survey question values and variables.
+   * For example, you may use the text processing in loading choices from the web. If your choicesByUrl.url equals to "UrlToServiceToGetAllCities/{country}/{state}",
+   * you may set on this event options.value to "all" or empty string when the "state" value/question is non selected by a user.
+   * <br/> name - the name of the processing value, for example, "state" in our example
+   * <br/> value - the value of the processing text
+   * <br/> isExists - a boolean value. Set it to true if you want to use the value and set it to false if you don't.
+   */
+  public onProcessTextValue: Event<
     (sender: SurveyModel, options: any) => any,
     any
   > = new Event<(sender: SurveyModel, options: any) => any, any>();
@@ -1014,6 +1047,12 @@ export class SurveyModel extends Base
   getLocString(str: string) {
     return surveyLocalization.getString(str);
   }
+  //ISurveyErrorOwner
+  getErrorCustomText(text: string, error: SurveyError): string {
+    var options = {text: text, name: error.getErrorType(), error: error};
+    this.onErrorCustomText.fire(this, options);
+    return options.text;
+  }
   /**
    * Returns the text that renders when there is no any visible page and question.
    */
@@ -1255,7 +1294,10 @@ export class SurveyModel extends Base
   public get data(): any {
     var result: { [index: string]: any } = {};
     for (var key in this.valuesHash) {
-      result[key] = this.getDataValueCore(this.valuesHash, key);
+      var dataValue = this.getDataValueCore(this.valuesHash, key);
+      if (dataValue !== undefined) {
+        result[key] = dataValue;
+      }
     }
     return result;
   }
@@ -1351,6 +1393,14 @@ export class SurveyModel extends Base
   public deleteDataValueCore(valuesHash: any, key: string) {
     delete valuesHash[key];
   }
+  // protected iterateDataValuesHash(func: (hash: any, key: any) => void) {
+  //   var keys: any[] = [];
+  //   for (var key in this.valuesHash) {
+  //     keys.push(key);
+  //   }
+  //   keys.forEach(key => func(this.valuesHash, key));
+  // }
+
   /**
    * Returns all comments from the data.
    * @see data
@@ -1413,9 +1463,12 @@ export class SurveyModel extends Base
    * @see firstPageIsStarted
    */
   public get startedPage(): PageModel {
-    return this.firstPageIsStarted && this.pages.length > 0
-      ? this.pages[0]
-      : null;
+    var page =
+      this.firstPageIsStarted && this.pages.length > 0 ? this.pages[0] : null;
+    if (!!page) {
+      page.onFirstRendering();
+    }
+    return page;
   }
   /**
    * Returns the current survey page. If survey is rendred then it is a page that a user can see/edit.
@@ -1927,7 +1980,11 @@ export class SurveyModel extends Base
   }
   protected onIsValidatingOnServerChanged() {}
   protected doServerValidation(): boolean {
-    if (!this.onServerValidateQuestions) return false;
+    if (
+      !this.onServerValidateQuestions ||
+      this.onServerValidateQuestions.isEmpty
+    )
+      return false;
     var self = this;
     var options = {
       data: <{ [index: string]: any }>{},
@@ -1945,7 +2002,13 @@ export class SurveyModel extends Base
         options.data[question.getValueName()] = value;
     }
     this.setIsValidatingOnServer(true);
-    this.onServerValidateQuestions(this, options);
+
+    if (typeof this.onServerValidateQuestions === "function") {
+      this.onServerValidateQuestions(this, options);
+    } else {
+      this.onServerValidateQuestions.fire(this, options);
+    }
+
     return true;
   }
   private completeServerValidation(options: any) {
@@ -2704,7 +2767,16 @@ export class SurveyModel extends Base
   }
   protected onBeforeCreating() {}
   protected onCreating() {}
-  private getProcessedTextValue(textValue: TextPreProcessorValue): any {
+  private getProcessedTextValue(textValue: TextPreProcessorValue): void {
+    this.getProcessedTextValueCore(textValue);
+    if (!this.onProcessTextValue.isEmpty) {
+      var wasEmpty = this.isValueEmpty(textValue.value);
+      this.onProcessTextValue.fire(this, textValue);
+      textValue.isExists =
+        textValue.isExists || (wasEmpty && !this.isValueEmpty(textValue.value));
+    }
+  }
+  private getProcessedTextValueCore(textValue: TextPreProcessorValue): void {
     var name = textValue.name.toLocaleLowerCase();
     if (["no", "require", "title"].indexOf(name) !== -1) {
       return;
@@ -3166,19 +3238,27 @@ export class SurveyModel extends Base
     return this.processText(options.html, true);
   }
   processText(text: string, returnDisplayValue: boolean): string {
-    return this.processTextCore(text, returnDisplayValue);
+    return this.processTextEx(text, returnDisplayValue, false).text;
   }
-  processTextEx(text: string, returnDisplayValue: boolean): any {
+  processTextEx(
+    text: string,
+    returnDisplayValue: boolean,
+    doEncoding: boolean
+  ): any {
     var res = {
-      text: this.processTextCore(text, returnDisplayValue),
+      text: this.processTextCore(text, returnDisplayValue, doEncoding),
       hasAllValuesOnLastRun: true
     };
     res.hasAllValuesOnLastRun = this.textPreProcessor.hasAllValuesOnLastRun;
     return res;
   }
-  private processTextCore(text: string, returnDisplayValue: boolean): string {
+  private processTextCore(
+    text: string,
+    returnDisplayValue: boolean,
+    doEncoding: boolean = false
+  ): string {
     if (this.isDesignMode) return text;
-    return this.textPreProcessor.process(text, returnDisplayValue);
+    return this.textPreProcessor.process(text, returnDisplayValue, doEncoding);
   }
   getSurveyMarkdownHtml(element: Base, text: string): string {
     var options = { element: element, text: text, html: <any>null };

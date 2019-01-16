@@ -1125,6 +1125,24 @@ QUnit.test("Server validation", function(assert) {
     }
     options.complete();
   };
+  survey.onServerValidateQuestions.add(function(sender, options) {
+    serverFunction(options);
+  });
+  survey.setValue("question1", 101);
+  survey.nextPage();
+  assert.equal(survey.currentPage.visibleIndex, 0, "Get server error");
+  survey.setValue("question1", 10);
+  survey.nextPage();
+  assert.equal(survey.currentPage.visibleIndex, 1, "No errors server error");
+});
+QUnit.test("Server validation (old api version)", function(assert) {
+  var survey = twoPageSimplestSurvey();
+  var serverFunction = function(options) {
+    if (options.data["question1"] && options.data["question1"] > 100) {
+      options.errors["question1"] = "Question 1 should be higher than 100";
+    }
+    options.complete();
+  };
   survey.onServerValidateQuestions = function(sender, options) {
     serverFunction(options);
   };
@@ -4590,10 +4608,10 @@ QUnit.test("ProcessTextEx returnedDisplayValue is false, Bug#1243", function(
   var page = survey.addNewPage("page1");
   var q = <QuestionDropdownModel>page.addNewQuestion("dropdown", "region");
   q.choices = ["1", "2", "3"];
-  var res = survey.processTextEx("{region}", false);
+  var res = survey.processTextEx("{region}", false, false);
   assert.ok(res.hasAllValuesOnLastRun === false, "region doesn't exists");
   q.value = 1;
-  res = survey.processTextEx("{region}", false);
+  res = survey.processTextEx("{region}", false, false);
   assert.ok(res.hasAllValuesOnLastRun === true, "region exists");
 });
 
@@ -5240,4 +5258,77 @@ QUnit.test("question.valueName is numeric, Bug# 1432", function(assert) {
   });
   var question = survey.getQuestionByValueName("10");
   assert.equal(question.name, "name", "The question has been found")
+});
+
+QUnit.test("Show several errors based on validation", function(assert) {
+  var survey = new SurveyModel({
+    questions: [{
+        "type": "multipletext",
+        "name": "q1",
+        "title": "Question 1 - Score",
+        "isRequired": true,
+        "requiredErrorText": "You must enter a response to the 'Question 1 - Score' question.",
+        "validators": [{
+          "type": "expression",
+          "text": "You must enter a response to the 'Question 1 - Score' question.",
+          "expression": "{q1.Field1} notempty or ({q1.Field1} empty and {q1.Field1} = 0) or {q1.Field2} notempty or ({q1.Field2} empty and {q1.Field2} = 0)"
+        }, {
+          "type": "expression",
+          "text": "The response to 'Field 1' must be a number between 0 and 48.",
+          "expression": "{q1.Field1} <= 48"
+        }, {
+          "type": "expression",
+          "text": "The response to 'Field 2' must be a number between 0 and 52.",
+          "expression": "{q1.Field2} <= 52"
+        }, {
+          "type": "expression",
+          "text": "The response to 'Question 1 - Score' must be an even number between 0 and 100.",
+          "expression": "({q1.Field1} + {q1.Field2}) <= 100"
+        }, {
+          "type": "expression",
+          "expression": "({q1.Field1} + {q1.Field2}) % 2 = 0"
+        }],
+        "items": [{
+          "name": "Field1",
+          "title": "Field 1",
+          "validators": [{
+            "type": "regex",
+            "text": "The response to 'Field 1' must be a number between 0 and 48.",
+            "regex": "^\\d*\\.?\\d*$"
+          }]
+        }, {
+          "name": "Field2",
+          "title": "Field 2",
+          "validators": [{
+            "type": "regex",
+            "text": "The response to 'Field 2' must be a number between 0 and 52.",
+            "regex": "^\\d*\\.?\\d*$"
+          }]
+        }]
+    }]
+  });
+  var question = <Question>survey.getQuestionByValueName("q1");
+  question.value = {Field1: 51, Field2: 60};
+  question.hasErrors(true);
+  assert.equal(question.errors.length, 4, "There are 4 errors should be shown");
+});
+
+QUnit.test("getCustomErrorText for error", function(assert) {
+  var survey = new SurveyModel( {
+              questions: [
+                  {
+                      name: "name",
+                      type: "text",
+                      isRequired: true
+                  }
+      ]
+  });
+  survey.onErrorCustomText.add(function(sender, options){
+    if(options.name == "required") {
+      options.text = "!!!";
+    }
+  });
+  var question = survey.currentPage.questions[0];
+  survey.pages[0].hasErrors(true);
+  assert.equal(question.errors[0].getText(), "!!!", "survey.onErrorCustomText works");
 });

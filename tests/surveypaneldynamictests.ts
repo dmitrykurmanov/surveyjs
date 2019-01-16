@@ -14,6 +14,8 @@ import { QuestionMultipleTextModel } from "../src/question_multipletext";
 import { QuestionCheckboxModel } from "../src/question_checkbox";
 import { QuestionRadiogroupModel } from "../src/question_radiogroup";
 import { QuestionTextModel } from "../src/question_text";
+import { QuestionMatrixDynamicModel } from "../src/question_matrixdynamic";
+import { matrixDropdownColumnTypes } from "../src/question_matrixdropdownbase";
 
 export default QUnit.module("Survey_QuestionPanelDynamic");
 
@@ -1132,7 +1134,37 @@ QUnit.test("Two PanelDynamic questions bound to the same value", function(
   assert.equal(q1.panelCount, 1, "q1: One panel was removed");
   assert.equal(q2.panelCount, 1, "q2: One panel was removed");
 });
-QUnit.test("matrixDynamic.addConditionNames", function(assert) {
+QUnit.test(
+  "PanelDynamic vs MatrixDynamic questions bound to the same value on different pages, bug#T464",
+  function(assert) {
+    var survey = new SurveyModel();
+    var page1 = survey.addNewPage("p1");
+    var page2 = survey.addNewPage("p2");
+    var matrix = new QuestionMatrixDynamicModel("q1");
+    matrix.valueName = "val";
+    matrix.addColumn("t1");
+    matrix.rowCount = 1;
+    var panel = new QuestionPanelDynamicModel("q2");
+    panel.valueName = "val";
+    panel.template.addNewQuestion("text", "t1");
+    panel.template.addNewQuestion("text", "t2");
+    page1.addElement(matrix);
+    page2.addElement(panel);
+
+    matrix.value = [{ t1: "test" }];
+    assert.equal(
+      panel.panelCount,
+      1,
+      "By default there are two panels in panel2"
+    );
+    matrix.value = [{ t1: "test" }, { t1: "test2" }];
+    assert.equal(panel.panelCount, 2, "One row and one panel were added");
+    matrix.removeRow(1);
+    assert.equal(panel.panelCount, 1, "matrix: One row was removed");
+    assert.equal(panel.panelCount, 1, "panel: One panel was removed");
+  }
+);
+QUnit.test("panelDynamic.addConditionNames", function(assert) {
   var names = [];
   var panel = new QuestionPanelDynamicModel("panel");
   panel.template.addNewQuestion("text", "q1");
@@ -1145,6 +1177,71 @@ QUnit.test("matrixDynamic.addConditionNames", function(assert) {
     names,
     ["panel[0].q1", "panel[0].q2.item1", "panel[0].q2.item2"],
     "addConditionNames work correctly for panel dynamic"
+  );
+});
+
+QUnit.test("panelDynamic.addConditionObjectsByContext", function(assert) {
+  var objs = [];
+  var panel = new QuestionPanelDynamicModel("panel");
+  panel.title = "Panel";
+  var q1 = panel.template.addNewQuestion("text", "q1");
+  var question = new QuestionMultipleTextModel("q2");
+  question.title = "Question 2";
+  question.addItem("item1");
+  question.addItem("item2");
+  panel.template.addQuestion(question);
+  panel.addConditionObjectsByContext(objs, null);
+  for (var i = 0; i < objs.length; i++) {
+    objs[i].question = objs[i].question.name;
+  }
+  assert.deepEqual(
+    objs,
+    [
+      { name: "panel[0].q1", text: "Panel[0].q1", question: "q1" },
+      {
+        name: "panel[0].q2.item1",
+        text: "Panel[0].Question 2.item1",
+        question: "q2"
+      },
+      {
+        name: "panel[0].q2.item2",
+        text: "Panel[0].Question 2.item2",
+        question: "q2"
+      }
+    ],
+    "addConditionObjectsByContext work correctly for panel dynamic"
+  );
+  objs = [];
+  panel.addConditionObjectsByContext(objs, q1);
+  for (var i = 0; i < objs.length; i++) {
+    objs[i].question = objs[i].question.name;
+  }
+  assert.deepEqual(
+    objs,
+    [
+      { name: "panel[0].q1", text: "Panel[0].q1", question: "q1" },
+      {
+        name: "panel[0].q2.item1",
+        text: "Panel[0].Question 2.item1",
+        question: "q2"
+      },
+      {
+        name: "panel[0].q2.item2",
+        text: "Panel[0].Question 2.item2",
+        question: "q2"
+      },
+      {
+        name: "panel.q2.item1",
+        text: "panel.Question 2.item1",
+        question: "q2"
+      },
+      {
+        name: "panel.q2.item2",
+        text: "panel.Question 2.item2",
+        question: "q2"
+      }
+    ],
+    "addConditionObjectsByContext work correctly for panel dynamic"
   );
 });
 
@@ -1817,3 +1914,64 @@ QUnit.test("Panel dynamic and survey.data setup", function(assert) {
     "Remove panels if set empty data"
   );
 });
+QUnit.test(
+  "Panel dynamic nested dynamic panel and display mode, Bug#1488",
+  function(assert) {
+    var json = {
+      elements: [
+        {
+          type: "paneldynamic",
+          name: "question1",
+          templateElements: [
+            {
+              type: "paneldynamic",
+              name: "question2",
+              title: "Inner dynamic panel",
+              templateElements: [
+                {
+                  type: "text",
+                  name: "question3"
+                }
+              ],
+              panelCount: 2
+            },
+            {
+              type: "checkbox",
+              name: "question4",
+              title: "Checkbox question",
+              choices: ["item1", "item2", "item3"]
+            }
+          ],
+          panelCount: 1
+        }
+      ],
+      mode: "display"
+    };
+
+    var survey = new SurveyModel(json);
+    var panel1 = <QuestionPanelDynamicModel>survey.getQuestionByName(
+      "question1"
+    );
+    var question4 = <QuestionPanelDynamicModel>panel1.panels[0].getQuestionByName(
+      "question4"
+    );
+    assert.equal(question4.isReadOnly, true, "The question should be readonly");
+    var panel2 = <QuestionPanelDynamicModel>panel1.panels[0].getQuestionByName(
+      "question2"
+    );
+    assert.ok(
+      panel2.survey,
+      "survey is set correctly to the nest dynamic panel"
+    );
+    var question3 = panel2.panels[0].getQuestionByName("question3");
+    assert.ok(
+      question3.survey,
+      "survey is set correctly to the nest dynamic panel question"
+    );
+    assert.equal(
+      question3.isReadOnly,
+      true,
+      "The question inside the nested dynamic panel should be readonly"
+    );
+  }
+);

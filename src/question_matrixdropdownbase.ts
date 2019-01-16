@@ -294,6 +294,12 @@ export class MatrixDropdownColumn extends Base implements ILocalizableOwner {
   public set enableIf(val: string) {
     this.templateQuestion.enableIf = val;
   }
+  public get requiredIf(): string {
+    return this.templateQuestion.requiredIf;
+  }
+  public set requiredIf(val: string) {
+    this.templateQuestion.requiredIf = val;
+  }
   public get validators(): Array<SurveyValidator> {
     return this.templateQuestion.validators;
   }
@@ -500,8 +506,11 @@ export class MatrixDropdownRowModelBase
       self.getProcessedTextValue(textValue);
     };
     for (var i = 0; i < this.data.columns.length; i++) {
-      if (this.rowValues[this.data.columns[i].name] === undefined) {
-        this.rowValues[this.data.columns[i].name] = null;
+      if (
+        this.getDataValueCore(this.rowValues, this.data.columns[i].name) ===
+        undefined
+      ) {
+        this.setDataValueCore(this.rowValues, this.data.columns[i].name, null);
       }
     }
     this.idValue = MatrixDropdownRowModelBase.getId();
@@ -513,7 +522,11 @@ export class MatrixDropdownRowModelBase
     return null;
   }
   public get value(): any {
-    return this.rowValues;
+    var result: any = {};
+    for (var valueName in this.rowValues) {
+      result[valueName] = this.getDataValueCore(this.rowValues, valueName);
+    }
+    return result;
   }
   getAllValues(): any {
     return this.value;
@@ -531,7 +544,9 @@ export class MatrixDropdownRowModelBase
   }
   public set value(value: any) {
     this.isSettingValue = true;
-    this.rowValues = {};
+    for (var valueName in this.rowValues) {
+      this.deleteDataValueCore(this.rowValues, valueName);
+    }
     if (value != null) {
       for (var key in value) {
         this.setDataValueCore(this.rowValues, key, value[key]);
@@ -547,6 +562,14 @@ export class MatrixDropdownRowModelBase
   public onAnyValueChanged(name: string) {
     for (var i = 0; i < this.cells.length; i++) {
       this.cells[i].question.onAnyValueChanged(name);
+    }
+  }
+  public getDataValueCore(valuesHash: any, key: string) {
+    var survey = this.getSurvey();
+    if (!!survey) {
+      return (<any>survey).getDataValueCore(valuesHash, key);
+    } else {
+      return valuesHash[key];
     }
   }
   public setDataValueCore(valuesHash: any, key: string, value: any) {
@@ -567,7 +590,7 @@ export class MatrixDropdownRowModelBase
   }
 
   public getValue(name: string): any {
-    return this.rowValues[name];
+    return this.getDataValueCore(this.rowValues, name);
   }
   public setValue(name: string, newValue: any) {
     if (this.isSettingValue) return;
@@ -688,7 +711,7 @@ export class MatrixDropdownRowModelBase
     text = this.processText(text, returnDisplayValue);
     if (!this.getSurvey()) return text;
     var hasAllValuesOnLastRun = this.textPreProcessor.hasAllValuesOnLastRun;
-    var res = this.getSurvey().processTextEx(text, returnDisplayValue);
+    var res = this.getSurvey().processTextEx(text, returnDisplayValue, false);
     res.hasAllValuesOnLastRun =
       res.hasAllValuesOnLastRun && hasAllValuesOnLastRun;
     return res;
@@ -1287,6 +1310,7 @@ JsonObject.metaData.addClass(
     "minWidth",
     "visibleIf:condition",
     "enableIf:condition",
+    "requiredIf:condition",
     {
       name: "validators:validators",
       baseClassName: "surveyvalidator",

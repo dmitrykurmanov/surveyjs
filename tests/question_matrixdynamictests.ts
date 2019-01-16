@@ -841,6 +841,53 @@ QUnit.test("Matrixdynamic column.enableIf", function(assert) {
     "3. q2 enableIf depends on column1 - true"
   );
 });
+QUnit.test("Matrixdynamic column.requiredIf", function(assert) {
+  var question = new QuestionMatrixDynamicModel("matrixDynamic");
+  question.rowCount = 2;
+  question.columns.push(new MatrixDropdownColumn("column1"));
+  question.columns.push(new MatrixDropdownColumn("column2"));
+  question.columns.push(new MatrixDropdownColumn("column3"));
+  question.columns[0]["choices"] = [1, 2, 3];
+  question.columns[1]["choices"] = [4, 5];
+  question.columns[2]["choices"] = [7, 8, 9, 10];
+
+  question.columns[1].requiredIf = "{row.column1} = 2";
+  question.columns[2].requiredIf = "{a} = 5";
+
+  var visibleRows = question.visibleRows;
+  var q1 = <QuestionDropdownModel>visibleRows[0].cells[0].question;
+  var q2 = <QuestionDropdownModel>visibleRows[0].cells[1].question;
+  var q3 = <QuestionDropdownModel>visibleRows[0].cells[2].question;
+
+  var values = { a: 3 };
+  question.runCondition(values, null);
+  assert.equal(q1.isRequired, false, "1. q1 requiredIf is empty");
+  assert.equal(
+    q2.isRequired,
+    false,
+    "1. q2 requireIf depends on column1 - false"
+  );
+  assert.equal(
+    q3.isRequired,
+    false,
+    "1. q3 requiredIf depends on external data - false"
+  );
+  values = { a: 5 };
+  question.runCondition(values, null);
+  assert.equal(
+    q3.isRequired,
+    true,
+    "2. q3 requiredIf depends on external data - true"
+  );
+
+  q1.value = 2;
+  question.runCondition(values, null);
+  assert.equal(
+    q2.isRequired,
+    true,
+    "3. q2 requiredIf depends on column1 - true"
+  );
+});
 QUnit.test(
   "Matrixdynamic column.visibleIf, load from json and add item",
   function(assert) {
@@ -1043,6 +1090,119 @@ QUnit.test("matrixDynamic.addConditionNames", function(assert) {
     "addConditionNames work correctly for matrix dynamic"
   );
 });
+QUnit.test("matrixDynamic.addConditionObjectsByContext", function(assert) {
+  var objs = [];
+  var question = new QuestionMatrixDynamicModel("matrix");
+  question.title = "Matrix";
+  question.addColumn("col1", "Column 1");
+  question.addColumn("col2");
+  question.addConditionObjectsByContext(objs, null);
+  for (var i = 0; i < objs.length; i++) {
+    objs[i].question = objs[i].question.name;
+  }
+  assert.deepEqual(
+    objs,
+    [
+      {
+        name: "matrix[0].col1",
+        text: "Matrix[0].Column 1",
+        question: "matrix"
+      },
+      { name: "matrix[0].col2", text: "Matrix[0].col2", question: "matrix" }
+    ],
+    "addConditionObjectsByContext work correctly for matrix dynamic"
+  );
+  objs = [];
+  question.addConditionObjectsByContext(objs, question.columns[0]);
+  for (var i = 0; i < objs.length; i++) {
+    objs[i].question = objs[i].question.name;
+  }
+  assert.deepEqual(
+    objs,
+    [
+      {
+        name: "matrix[0].col1",
+        text: "Matrix[0].Column 1",
+        question: "matrix"
+      },
+      { name: "matrix[0].col2", text: "Matrix[0].col2", question: "matrix" },
+      { name: "row.col2", text: "row.col2", question: "matrix" }
+    ],
+    "addConditionObjectsByContext work correctly for matrix dynamic with context"
+  );
+});
+QUnit.test("matrixDropdown.addConditionObjectsByContext", function(assert) {
+  var objs = [];
+  var question = new QuestionMatrixDropdownModel("matrix");
+  question.addColumn("col1", "Column 1");
+  question.addColumn("col2");
+  question.rows = ["row1", "row2"];
+  question.title = "Matrix";
+  question.rows[0].text = "Row 1";
+  question.addConditionObjectsByContext(objs, null);
+  for (var i = 0; i < objs.length; i++) {
+    objs[i].question = objs[i].question.name;
+  }
+  assert.deepEqual(
+    objs,
+    [
+      {
+        name: "matrix.row1.col1",
+        text: "Matrix.Row 1.Column 1",
+        question: "matrix"
+      },
+      {
+        name: "matrix.row1.col2",
+        text: "Matrix.Row 1.col2",
+        question: "matrix"
+      },
+      {
+        name: "matrix.row2.col1",
+        text: "Matrix.row2.Column 1",
+        question: "matrix"
+      },
+      {
+        name: "matrix.row2.col2",
+        text: "Matrix.row2.col2",
+        question: "matrix"
+      }
+    ],
+    "addConditionObjectsByContext work correctly for matrix dropdown"
+  );
+  objs = [];
+  question.addConditionObjectsByContext(objs, question.columns[0]);
+  for (var i = 0; i < objs.length; i++) {
+    objs[i].question = objs[i].question.name;
+  }
+  assert.deepEqual(
+    objs,
+    [
+      {
+        name: "matrix.row1.col1",
+        text: "Matrix.Row 1.Column 1",
+        question: "matrix"
+      },
+      {
+        name: "matrix.row1.col2",
+        text: "Matrix.Row 1.col2",
+        question: "matrix"
+      },
+      {
+        name: "matrix.row2.col1",
+        text: "Matrix.row2.Column 1",
+        question: "matrix"
+      },
+      {
+        name: "matrix.row2.col2",
+        text: "Matrix.row2.col2",
+        question: "matrix"
+      },
+      { name: "row.col2", text: "row.col2", question: "matrix" }
+    ],
+    "addConditionObjectsByContext work correctly for matrix dropdown with context"
+  );
+});
+
 QUnit.test("matrixDropdown.addConditionNames", function(assert) {
   var names = [];
   var question = new QuestionMatrixDropdownModel("matrix");

@@ -8,7 +8,7 @@ import {
   ITextProcessor
 } from "./base";
 import { SurveyValidator, IValidatorOwner, ValidatorRunner } from "./validator";
-import { Question } from "./question";
+import { Question, IConditionObject } from "./question";
 import { QuestionTextModel } from "./question_text";
 import { JsonObject } from "./jsonobject";
 import { QuestionFactory } from "./questionfactory";
@@ -31,7 +31,6 @@ export class MultipleTextItemModel extends Base
   private editorValue: QuestionTextModel;
   private data: IMultipleTextData;
 
-  _valueChangedCallback: (newValue: any) => void;
   valueChangedCallback: (newValue: any) => void;
   validators: Array<SurveyValidator> = new Array<SurveyValidator>();
 
@@ -160,7 +159,6 @@ export class MultipleTextItemModel extends Base
     return Helpers.isValueEmpty(this.value);
   }
   public onValueChanged(newValue: any) {
-    if (this._valueChangedCallback) this._valueChangedCallback(newValue);
     if (this.valueChangedCallback) this.valueChangedCallback(newValue);
   }
   //ISurveyImpl
@@ -296,6 +294,19 @@ export class QuestionMultipleTextModel extends Question
       names.push(this.name + "." + this.items[i].name);
     }
   }
+  public addConditionObjectsByContext(
+    objects: Array<IConditionObject>,
+    context: any
+  ) {
+    for (var i = 0; i < this.items.length; i++) {
+      var item = this.items[i];
+      objects.push({
+        name: this.name + "." + item.name,
+        text: this.processedTitle + "." + item.fullTitle,
+        question: this
+      });
+    }
+  }
   public getConditionJson(operator: string = null, path: string = null): any {
     if (!path) return super.getConditionJson();
     var item = this.getItemByName(path);
@@ -373,22 +384,24 @@ export class QuestionMultipleTextModel extends Question
       this.items[i].onValueChanged(itemValue);
     }
   }
-  protected runValidators(): SurveyError {
-    var error = super.runValidators();
-    if (error != null) return error;
+  protected runValidators(): Array<SurveyError> {
+    var errors = super.runValidators();
     for (var i = 0; i < this.items.length; i++) {
       if (this.items[i].isEmpty()) continue;
-      error = new ValidatorRunner().run(this.items[i]);
-      if (error != null) return error;
+
+      var itemErrors = new ValidatorRunner().run(this.items[i]);
+      for (var j = 0; j < itemErrors.length; j++) {
+        errors.push(itemErrors[j]);
+      }
     }
-    return null;
+    return errors;
   }
   protected onCheckForErrors(errors: Array<SurveyError>) {
     super.onCheckForErrors(errors);
     for (var i = 0; i < this.items.length; i++) {
       var item = this.items[i];
       if (item.isRequired && Helpers.isValueEmpty(item.value)) {
-        errors.push(new AnswerRequiredError());
+        errors.push(new AnswerRequiredError(null, this));
       }
     }
   }

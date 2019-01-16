@@ -1,8 +1,8 @@
-import { Base, SurveyError, ITextProcessor } from "./base";
+import { Base, SurveyError, ITextProcessor, IQuestion } from "./base";
 import { ItemValue } from "./itemvalue";
 import { JsonObject, JsonObjectProperty } from "./jsonobject";
 import { surveyLocalization } from "./surveyStrings";
-import { CustomError } from "./error";
+import { WebRequestError, WebRequestEmptyError } from "./error";
 
 class XmlParser {
   private parser = new DOMParser();
@@ -46,7 +46,7 @@ class XmlParser {
  * The run method call a restfull service and results can be get on getResultCallback.
  */
 export class ChoicesRestfull extends Base {
-  private static itemsResult:{ [index: string]: any } = {};
+  private static itemsResult: { [index: string]: any } = {};
   public static onBeforeSendRequest: (
     sender: ChoicesRestfull,
     options: { request: XMLHttpRequest }
@@ -70,7 +70,7 @@ export class ChoicesRestfull extends Base {
     serverResult: any
   ) => Array<ItemValue>;
   public error: SurveyError = null;
-  public owner: Base;
+  public owner: IQuestion;
   constructor() {
     super();
   }
@@ -83,8 +83,8 @@ export class ChoicesRestfull extends Base {
     }
     if (this.lastObjHash == this.objHash) return;
     this.lastObjHash = this.objHash;
-    if (this.useChangedItemsResults()) return;
     this.error = null;
+    if (this.useChangedItemsResults()) return;
     this.sendRequest();
   }
   public get isRunning() {
@@ -105,8 +105,8 @@ export class ChoicesRestfull extends Base {
   }
   private processedText(textProcessor: ITextProcessor) {
     if (textProcessor) {
-      var pUrl = textProcessor.processTextEx(this.url, false);
-      var pPath = textProcessor.processTextEx(this.path, false);
+      var pUrl = textProcessor.processTextEx(this.url, false, true);
+      var pPath = textProcessor.processTextEx(this.path, false, true);
       if (!pUrl.hasAllValuesOnLastRun || !pPath.hasAllValuesOnLastRun) {
         this.processedUrl = "";
         this.processedPath = "";
@@ -119,7 +119,7 @@ export class ChoicesRestfull extends Base {
       this.processedPath = this.path;
     }
   }
-  protected parseResponse(response:any) {
+  protected parseResponse(response: any) {
     let parsedResponse;
     if (
       !!response &&
@@ -134,8 +134,8 @@ export class ChoicesRestfull extends Base {
       } catch {
         parsedResponse = (response || "")
           .split("\n")
-          .map((s:any) => s.trim(" "))
-          .filter((s:any) => !!s);
+          .map((s: any) => s.trim(" "))
+          .filter((s: any) => !!s);
       }
     }
     return parsedResponse;
@@ -212,7 +212,8 @@ export class ChoicesRestfull extends Base {
     if (this.titleName) res["titleName"] = this.titleName;
     var properties = this.getCustomPropertiesNames();
     for (var i = 0; i < properties.length; i++) {
-      if ((<any>this)[properties[i]]) res[properties[i]] = (<any>this)[properties[i]];
+      if ((<any>this)[properties[i]])
+        res[properties[i]] = (<any>this)[properties[i]];
     }
     return res;
   }
@@ -274,9 +275,7 @@ export class ChoicesRestfull extends Base {
         items.push(item);
       }
     } else {
-      this.error = new CustomError(
-        surveyLocalization.getString("urlGetChoicesError")
-      );
+      this.error = new WebRequestEmptyError(null, this.owner);
     }
     if (this.updateResultCallback) {
       items = this.updateResultCallback(items, result);
@@ -304,11 +303,7 @@ export class ChoicesRestfull extends Base {
     return propertyName;
   }
   private onError(status: string, response: string) {
-    this.error = new CustomError(
-      surveyLocalization
-        .getString("urlRequestError")
-        ["format"](status, response)
-    );
+    this.error = new WebRequestError(status, response, this.owner);
     this.doEmptyResultCallback(response);
   }
   private getResultAfterPath(result: any) {

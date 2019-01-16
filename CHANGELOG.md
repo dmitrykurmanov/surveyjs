@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.0.64"></a>
+## [1.0.64](https://github.com/surveyjs/surveyjs/compare/v1.0.63...v1.0.64) (2019-01-15)
+
+
+
+<a name="1.0.63"></a>
+## [1.0.63](https://github.com/surveyjs/surveyjs/compare/v1.0.62...v1.0.63) (2018-12-28)
+
+
+
+<a name="1.0.62"></a>
+## [1.0.62](https://github.com/surveyjs/surveyjs/compare/v1.0.61...v1.0.62) (2018-12-27)
+
+
+
+<a name="1.0.61"></a>
+## [1.0.61](https://github.com/surveyjs/surveyjs/compare/v1.0.60...v1.0.61) (2018-12-19)
+
+
+
+<a name="1.0.60"></a>
+## [1.0.60](https://github.com/surveyjs/surveyjs/compare/v1.0.59...v1.0.60) (2018-12-11)
+
+
+
 <a name="1.0.59"></a>
 ## [1.0.59](https://github.com/surveyjs/surveyjs/compare/v1.0.58...v1.0.59) (2018-12-04)
 

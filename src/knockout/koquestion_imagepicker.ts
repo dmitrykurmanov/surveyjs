@@ -3,29 +3,39 @@ import { QuestionImagePickerModel } from "../question_imagepicker";
 import { JsonObject } from "../jsonobject";
 import { QuestionFactory } from "../questionfactory";
 import { QuestionCheckboxBaseImplementor } from "./koquestion_baseselect";
+import { Question } from "../question";
+import { Helpers } from "../helpers";
 
 class QuestionImagePickerImplementor extends QuestionCheckboxBaseImplementor {
-  constructor(question: QuestionImagePicker) {
+  private _koValue = ko.observableArray<any>();
+
+  constructor(question: Question) {
     super(question);
-  }
-  protected createkoValue(): any {
-    if (!(<QuestionImagePickerModel>this.question).multiSelect) {
-      return ko.observable(this.question.value);
-    }
-    return this.question.value
-      ? ko.observableArray(this.question.value)
-      : ko.observableArray();
-  }
-  protected setkoValue(newValue: any) {
-    if (!(<QuestionImagePickerModel>this.question).multiSelect) {
-      this.koValue(newValue);
-    } else {
-      if (newValue) {
-        this.koValue([].concat(newValue));
-      } else {
-        this.koValue([]);
-      }
-    }
+    this._koValue.subscribe(newValue => {
+      this.question.value = newValue;
+    });
+    Object.defineProperty(this.question, "koValue", {
+      get: () => {
+        if (!Helpers.isTwoValueEquals(this._koValue(), this.question.value)) {
+          if(this.question.multiSelect) {
+            this._koValue(this.question.value || []);
+          } else {
+            this._koValue(this.question.value);
+          }
+        }
+        return this._koValue;
+      },
+      set: (newValue: Array<any> | KnockoutObservableArray<any> | any) => {
+        if(this.question.multiSelect) {
+          var newVal = [].concat(ko.unwrap(newValue));
+          this.question.value = newVal;
+        } else {
+          this.question.value = ko.unwrap(newValue);
+        }
+      },
+      enumerable: true,
+      configurable: true
+    });
   }
 }
 
@@ -37,18 +47,18 @@ export class QuestionImagePicker extends QuestionImagePickerModel {
     super.endLoadingFromJson();
     new QuestionImagePickerImplementor(this);
   }
-  getItemClass(item:any) {
+  getItemClass(item: any) {
     var itemClass =
       this.cssClasses.item +
       (this.colCount === 0
         ? " sv_q_imagepicker_inline"
         : " sv-q-col-" + this.colCount);
     if (this.multiSelect) {
-      if (!!(<any>this)["koValue"]() && (<any>this)["koValue"]().indexOf(item.value) !== -1) {
+      if (!!this.value && this["koValue"]().indexOf(item.value) !== -1) {
         itemClass += " checked";
       }
     } else {
-      if (!!item.value && item.value === (<any>this)["koValue"]()) {
+      if (!!item.value && item.value === this["koValue"]()) {
         itemClass += " checked";
       }
     }

@@ -14,6 +14,8 @@ export class StylesManager {
 
     ".sv_main span": "word-break: break-word;",
 
+    ".sv_main legend": "border: none; margin: 0;",
+
     ".sv_bootstrap_css .sv_qstn": "padding: 0.5em 1em 1.5em 1em;",
     ".sv_bootstrap_css .sv_qcbc input[type=checkbox], .sv_bootstrap_css .sv_qcbc input[type=radio]":
       "vertical-align: middle; margin-top: -1px",
@@ -157,6 +159,18 @@ export class StylesManager {
     ".sv_main .sv_container .panel-body.card-block .sv_row .sv_qstn .radio label, .sv_main .sv_container .panel-body.card-block .sv_row .sv_qstn .checkbox label": {
       style: "line-height: 12px; vertical-align: top;",
       media: "@media (max-width: 600px)"
+    },
+    ".sv_main .sv_custom_header": {
+      style: "display: none;",
+      media: "@media (max-width: 1300px)"
+    },
+    ".sv_main .sv_container .sv_header h3": {
+      style: "font-size: 1.5em;",
+      media: "@media (max-width: 1300px)"
+    },
+    ".sv_main .sv_container .sv_header h3 span": {
+      style: "font-size: 0.75em;",
+      media: "@media (max-width: 700px)"
     }
   };
 

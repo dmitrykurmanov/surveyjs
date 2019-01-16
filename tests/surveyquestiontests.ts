@@ -301,6 +301,16 @@ QUnit.test("Question titleLocation", function(assert) {
     "the second question has visible index 0 now"
   );
 });
+QUnit.skip("Use value of checkbox question as an array", function(assert) {
+  var survey = new SurveyModel();
+  var page = survey.addNewPage("Page 1");
+  var question = new QuestionCheckboxModel("checkboxQuestion");
+  question.choices = ["One", "Two", "Three"];
+  page.addQuestion(question);
+
+  question.value.push("One");
+  assert.deepEqual(question.value, ["One"], "convert value to array");
+});
 QUnit.test("Pre-proccess value for Checkbox", function(assert) {
   var survey = new SurveyModel();
   var page = survey.addNewPage("Page 1");
@@ -812,13 +822,9 @@ QUnit.test("SelectBase visibleChoices order", function(assert) {
 QUnit.test("Question callbacks test", function(assert) {
   var question = new QuestionTextModel("textQuestion");
   var valueChanged = 0;
-  var _valueChanged = 0;
   var commentChanged = 0;
   var visibleChanged = 0;
   var visibleIndexChanged = 0;
-  question._valueChangedCallback = function() {
-    _valueChanged++;
-  };
   question.valueChangedCallback = function() {
     valueChanged++;
   };
@@ -835,11 +841,6 @@ QUnit.test("Question callbacks test", function(assert) {
   question.comment = "comment";
   question.visible = false;
   question.setVisibleIndex(5);
-  assert.equal(
-    _valueChanged,
-    1,
-    "value changed aux callbacl is called one time"
-  );
   assert.equal(valueChanged, 1, "value changed one time");
   assert.equal(commentChanged, 1, "comment changed one time");
   assert.equal(visibleChanged, 1, "visibiblity changed one time");
@@ -1214,21 +1215,34 @@ QUnit.test("question.addConditionNames", function(assert) {
     "addConditionNames work correctly"
   );
 });
-QUnit.test("question.addConditionNames", function(assert) {
-  var names = [];
-  new QuestionHtmlModel("q_html").addConditionNames(names);
-  new QuestionCheckboxModel("q_check").addConditionNames(names);
+QUnit.test("question.addConditionObjectsByContext", function(assert) {
+  var objs = [];
+  var html = new QuestionHtmlModel("q_html");
+  html.addConditionObjectsByContext(objs, null);
+  var checkbox = new QuestionCheckboxModel("q_check");
+  checkbox.title = "My check title";
+  checkbox.addConditionObjectsByContext(objs, null);
   var q_mt = new QuestionMultipleTextModel("q_mt");
-  q_mt.addItem("item1");
+  q_mt.addItem("item1", "Item 1 title");
   q_mt.addItem("item2");
-  q_mt.addConditionNames(names);
+  q_mt.addConditionObjectsByContext(objs, null);
   var q_matrix = new QuestionMatrixModel("q_matrix");
   q_matrix.rows = ["row1", "row2"];
-  q_matrix.addConditionNames(names);
+  q_matrix.rows[0].text = "Row 1";
+  q_matrix.addConditionObjectsByContext(objs, null);
+  for (var i = 0; i < objs.length; i++) {
+    objs[i].question = objs[i].question.name;
+  }
   assert.deepEqual(
-    names,
-    ["q_check", "q_mt.item1", "q_mt.item2", "q_matrix.row1", "q_matrix.row2"],
-    "addConditionNames work correctly"
+    objs,
+    [
+      { name: "q_check", text: "My check title", question: "q_check" },
+      { name: "q_mt.item1", text: "q_mt.Item 1 title", question: "q_mt" },
+      { name: "q_mt.item2", text: "q_mt.item2", question: "q_mt" },
+      { name: "q_matrix.row1", text: "q_matrix.Row 1", question: "q_matrix" },
+      { name: "q_matrix.row2", text: "q_matrix.row2", question: "q_matrix" }
+    ],
+    "addConditionObjectsByContext work correctly"
   );
 });
 
@@ -1835,6 +1849,14 @@ QUnit.test(
     );
   }
 );
+QUnit.test(
+  "Replace period '.' with space ' ' on setting a string with '.' into valueName",
+  function(assert) {
+    var question = new Question("q1");
+    question.valueName = "q.1.";
+    assert.equal(question.valueName, "q 1", "Correct the value name");
+  }
+);
 
 QUnit.test(
   "readOnly property doesn't work for multipletext question, #1217",
@@ -1985,3 +2007,37 @@ QUnit.test(
     );
   }
 );
+QUnit.test("Load survey with requiredIf expression", function(assert) {
+  var survey = new SurveyModel({
+    elements: [
+      {
+        type: "text",
+        name: "q1",
+        defaultValue: 1
+      },
+      {
+        type: "text",
+        name: "q2",
+        requiredIf: "{q1} = 1"
+      }
+    ]
+  });
+  var question = <Question>survey.getQuestionByName("q2");
+  assert.equal(
+    question.isRequired,
+    true,
+    "The question becomes required on loading"
+  );
+  survey.setValue("q1", 2);
+  assert.equal(
+    question.isRequired,
+    false,
+    "The question becomes unrequired on changing value"
+  );
+  survey.setValue("q1", 1);
+  assert.equal(
+    question.isRequired,
+    true,
+    "The question becomes required on changing value"
+  );
+});
