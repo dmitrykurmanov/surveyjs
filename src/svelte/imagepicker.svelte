@@ -18,7 +18,7 @@
                     {#if question.contentMode === 'image'}
                         {@debug question}
                         <img class={question.cssClasses.image} src={item.imageLink} alt=""
-                            style="objectFit: {question.imageFi};
+                            style="object-fit: {question.imageFit};
                                 width: {question.imageWidth ? question.imageWidth + 'px' : undefine};
                                 height: {question.imageHeight ? question.imageHeight + 'px' : undefined};" />
                     {/if}
@@ -26,7 +26,7 @@
                         <embed class={question.cssClasses.image} src={item.imageLink} 
                             width={question.imageWidth ? question.imageWidth + 'px' : undefined} 
                             height={question.imageHeight ? question.imageHeight + 'px' : undefined}
-                            style="objectFit: {question.imageFit}" />
+                            style="object-fit: {question.imageFit}" />
                     {/if}
                     {#if question.showLabel}
                         <span title={item.text || item.value} class={question.cssClasses.itemText}>

@@ -6,7 +6,7 @@
                 <td></td>
             {/if}
             {#each question.visibleColumns as column}
-                <th style="minWidth: {question.getColumnWidth(column)}" >
+                <th style="min-width: {question.getColumnWidth(column)}" >
                     <SurveyString locString={column.locTitle}/>
                 </th>
             {/each}

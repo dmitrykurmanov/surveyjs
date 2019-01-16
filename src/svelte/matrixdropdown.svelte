@@ -1,4 +1,4 @@
-<div style="overflowX: {getOverflowX(question)};">
+<div style="overflow-x: {getOverflowX(question)};">
     <MatrixTable question={question} />
 </div>
 
