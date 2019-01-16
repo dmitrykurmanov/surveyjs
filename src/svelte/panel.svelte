@@ -10,7 +10,7 @@
             <SurveyString locString={question.locDescription}/>
         </div>
         <SurveyErrors question={question} />
-        <div  class:sjs-hide="isCollapsed" style="paddingLeft: {question.innerPaddingLeft };" >
+        <div  class:sjs-hide="isCollapsed" style="padding-left: {question.innerPaddingLeft };" >
             {#each question.rows as row, index}
                 {#if row.visible}
                 <div key={question.id + '_' + index} class={css.row}>

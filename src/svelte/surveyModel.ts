@@ -1,5 +1,6 @@
 import { SurveyModel } from "../survey";
 import { SurveyWindowModel } from "../surveyWindow";
+import { surveyCss } from "../defaultCss/cssstandard";
 
 export class SvelteSurveyModel extends SurveyModel {
   renderCallback: () => void;
@@ -7,6 +8,9 @@ export class SvelteSurveyModel extends SurveyModel {
     if (this.renderCallback) {
       this.renderCallback();
     }
+  }
+  get css() {
+    return surveyCss.getCss();
   }
 }
 
