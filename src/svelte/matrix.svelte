@@ -1,5 +1,5 @@
 <fieldset>
-    <legend>{question.locTitle.renderedHtml}</legend>
+    <legend aria-label={question.locTitle.renderedHtml}></legend>
     <table class={question.cssClasses.root}>
         <thead>
             <tr>

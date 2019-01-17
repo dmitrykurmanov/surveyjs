@@ -1,5 +1,5 @@
 <fieldset class={question.cssClasses.root}>
-    <legend>{question.locTitle.renderedHtml}</legend>
+    <legend aria-label={question.locTitle.renderedHtml}></legend>
     {#each question.visibleChoices as item, index}
         <div class={getItemClass(question, item)} >
             <label class={question.cssClasses.label}>
