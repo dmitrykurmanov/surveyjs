@@ -1,7 +1,6 @@
 import { Selector, ClientFunction } from "testcafe";
 
-export const frameworks = [/*"knockout", "jquery", "react", "vue",*/ "svelte"];
-// export const frameworks = ["knockout", "jquery", "react", "vue"];
+export const frameworks = ["knockout", "jquery", "react", "vue", "svelte"];
 
 export const url = "http://127.0.0.1:8080/examples/";
 
