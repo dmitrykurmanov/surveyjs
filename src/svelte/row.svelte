@@ -1,7 +1,7 @@
 <div>
 	  {#each row.elements as element (element.id)}
         {#if element.visible}
-          <div class={questionRootClass} style="padding-left: {getIndentSize(element, element.indent)}; padding-right: {getIndentSize(element, element.rightIndent)}; width: {element.renderWidth}">
+          <div class={questionRootClass} id={element.id} style="padding-left: {getIndentSize(element, element.indent)}; padding-right: {getIndentSize(element, element.rightIndent)}; width: {element.renderWidth}">
             <SurveyElement element={element} survey={survey} css={css} />
           </div>
         {/if}

@@ -1,4 +1,3 @@
-<div class={getQuestionClass(element, css)} id={element.id}>
     {#if element.hasTitleOnLeftTop}
         <div class={element.hasTitleOnLeft ? 'title-left' : ''}>
             {#if element.hasTitle}
@@ -43,7 +42,6 @@
             </div>
         {/if}
     </div>
-</div>
 
 <script>
   import SurveyString from "./string.svelte";
@@ -93,12 +91,12 @@
       removeCoreTwoWayBinding(this.get().element);
     },
     helpers: {
-      getQuestionClass(element, css) {
-        if (!!element.errors && element.errors.length > 0) {
-          return css.question.hasError;
-        }
-        return "";
-      }
+      // getQuestionClass(element, css) {
+      //   if (!!element.errors && element.errors.length > 0) {
+      //     return css.question.hasError;
+      //   }
+      //   return "";
+      // }
     },
     computed: {
       hasErrorsOnTop: ({ survey, element }) => {
