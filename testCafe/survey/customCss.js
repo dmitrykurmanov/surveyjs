@@ -61,6 +61,14 @@ const initSurvey = ClientFunction((framework, json) => {
     document.addEventListener("DOMContentLoaded", function() {
       ng.platformBrowserDynamic.bootstrap(HelloApp);
     });
+  } else if (framework === "svelte") {
+    model.css = myCss;
+    var svelteApp = new Survey.Survey({
+      target: document.querySelector("#surveyElement"),
+      data: {
+        surveyModel: model
+      }
+    });
   }
 
   window.survey = model;

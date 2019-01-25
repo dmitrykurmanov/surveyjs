@@ -12,6 +12,9 @@ export class SvelteSurveyModel extends SurveyModel {
   get css() {
     return surveyCss.getCss();
   }
+  set css(value: any) {
+    this.mergeValues(value, this.css);
+  }
 }
 
 export class SvelteSurveyWindowModel extends SurveyWindowModel {
