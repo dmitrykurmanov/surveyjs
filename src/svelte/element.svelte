@@ -1,4 +1,5 @@
-    {#if element.hasTitleOnLeftTop}
+<div ref:element class={questionRootClass} id={element.id} style="padding-left: {getIndentSize(element, element.indent)}; padding-right: {getIndentSize(element, element.rightIndent)}; width: {element.renderWidth}">
+  {#if element.hasTitleOnLeftTop}
         <div class={element.hasTitleOnLeft ? 'title-left' : ''}>
             {#if element.hasTitle}
                 <h5 class={element.cssClasses.title}>
@@ -11,42 +12,44 @@
                 </div>
             {/if}
         </div>
-    {/if}
+  {/if}
 
-    <div class={element.hasTitleOnLeft ? 'content-left' : ''}>
-        {#if hasErrorsOnTop}           
-            <SurveyErrors question={element} />
-        {/if}
+  <div class={element.hasTitleOnLeft ? 'content-left' : ''}>
+      {#if hasErrorsOnTop}           
+          <SurveyErrors question={element} />
+      {/if}
 
-        <svelte:component this={dynamicComponent} question={element} css={css}/>
-        
-        {#if element.hasComment}
-            <div>
-                <div>{element.commentText}</div>
-                <OtherChoice commentClass={css.comment} question={element} />
-            </div>
-        {/if}
+      <svelte:component this={dynamicComponent} question={element} css={css}/>
+      
+      {#if element.hasComment}
+          <div>
+              <div>{element.commentText}</div>
+              <OtherChoice commentClass={css.comment} question={element} />
+          </div>
+      {/if}
 
-        {#if hasErrorsOnBottom}
-            <SurveyErrors question={element} />
-        {/if}
+      {#if hasErrorsOnBottom}
+          <SurveyErrors question={element} />
+      {/if}
 
-        {#if element.hasTitleOnBottom}
-            <h5 class={element.cssClasses.title}>
-                <SurveyString locString={element.locTitle} />
-            </h5>
-        {/if}
-        {#if element.hasDescription}
-            <div class:sjs-hide="!element.hasTitleOnBottom" class={element.cssClasses.description}>
-                <SurveyString locString={element.locDescription} />
-            </div>
-        {/if}
-    </div>
+      {#if element.hasTitleOnBottom}
+          <h5 class={element.cssClasses.title}>
+              <SurveyString locString={element.locTitle} />
+          </h5>
+      {/if}
+      {#if element.hasDescription}
+          <div class:sjs-hide="!element.hasTitleOnBottom" class={element.cssClasses.description}>
+              <SurveyString locString={element.locDescription} />
+          </div>
+      {/if}
+  </div>
+</div>  
 
 <script>
   import SurveyString from "./string.svelte";
   import SurveyErrors from "./errors.svelte";
   import OtherChoice from "./otherChoice.svelte";
+  import { getIndentSize } from "./utils";
 
   import radiogroup from "./radiogroup.svelte";
   import checkbox from "./checkbox.svelte";
@@ -81,6 +84,14 @@
       SurveyErrors,
       OtherChoice
     },
+    oncreate() {
+      const survey = this.get().survey;
+      const element = this.get().element;
+
+      if (survey && !element.isPanel) {
+        survey.afterRenderQuestion(element, this.refs.element);
+      }
+    },
     onupdate() {
       const element = this.get().element;
       addCoreTwoWayBinding(element, () => {
@@ -97,6 +108,7 @@
       //   }
       //   return "";
       // }
+      getIndentSize
     },
     computed: {
       hasErrorsOnTop: ({ survey, element }) => {
@@ -128,6 +140,12 @@
           multipletext
         };
         return components[element.getTemplate()];
+      },
+      questionRootClass: ({ survey, css }) => {
+        if (survey.questionTitleLocation === "left") {
+          return css.question.mainRoot + " sv_qstn_left";
+        }
+        return css.question.mainRoot;
       }
     }
   };
