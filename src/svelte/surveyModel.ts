@@ -15,6 +15,12 @@ export class SvelteSurveyModel extends SurveyModel {
   set css(value: any) {
     this.mergeValues(value, this.css);
   }
+  protected onLoadSurveyFromService() {
+    this.render();
+  }
+  protected onLoadingSurveyFromService() {
+    this.render();
+  }
 }
 
 export class SvelteSurveyWindowModel extends SurveyWindowModel {
