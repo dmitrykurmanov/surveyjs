@@ -36,6 +36,16 @@
     components: {
       SurveyErrors
     },
+    onupdate() {
+      const cell = this.get().cell;
+      addCoreTwoWayBinding(cell, () => {
+        debugger;
+        this.set({ cell, ...cell });
+      });
+    },
+    ondestroy() {
+      removeCoreTwoWayBinding(this.get().cell.question);
+    },
     computed: {
       dynamicComponent: ({ cell }) => {
         const element = cell.question;
@@ -62,5 +72,46 @@
       }
     },
     methods: {}
+  };
+
+  const addCoreTwoWayBinding = (cell, handler) => {
+    let element = cell.question;
+
+    if (!element) return;
+    if (!element.iteratePropertiesHash) return;
+
+    const doIterate = (hash, key) => {
+      let val = hash[key];
+      if (!Array.isArray(val)) return;
+      val["onArrayChanged"] = handler;
+    };
+
+    element.iteratePropertiesHash(doIterate);
+
+    element.setPropertyValueCoreHandler = (hash, key, val) => {
+      if (hash[key] === val) return;
+      hash[key] = val;
+      handler();
+    };
+
+    element.visibleRowsChangedCallback = handler;
+  };
+
+  const removeCoreTwoWayBinding = cell => {
+    let element = cell.question;
+
+    if (!element) return;
+    if (!element.iteratePropertiesHash) return;
+
+    const doIterate = (hash, key) => {
+      let val = hash[key];
+      if (!Array.isArray(val)) return;
+      val["onArrayChanged"] = () => {};
+    };
+
+    element.iteratePropertiesHash(doIterate);
+
+    element.setPropertyValueCoreHandler = undefined;
+    element.visibleRowsChangedCallback = null;
   };
 </script>
