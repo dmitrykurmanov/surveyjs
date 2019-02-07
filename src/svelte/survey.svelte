@@ -192,7 +192,7 @@
 </script>
 
 <style>
-  :global(.sjs-hide) {
+  .sv_main :global(.sjs-hide) {
     display: none;
   }
 </style>
